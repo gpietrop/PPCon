@@ -55,6 +55,8 @@ def make_dict_single_float(path, date_time):
     pres_df = ds["PRES"][:].data[0]
     psal_df = ds["PSAL"][:].data[0]
     temp_df = ds["TEMP"][:].data[0]
+    if "DOXY" not in ds.variables.keys():
+        return dict()
     doxy_df = ds["DOXY"][:].data[0]
 
     temp = discretize(pres_df, temp_df)
@@ -73,7 +75,7 @@ def make_dataset(path_float_index):
     dict_ds = dict()
 
     for i in range(np.size(name_list)):
-        path = name_list[i]
+        path = "FLOAT_BIO/data/" + name_list[i]
         if not os.path.exists(path):
             continue
         date_time = datetime_list[i]
@@ -86,7 +88,6 @@ def make_dataset(path_float_index):
 def make_pandas_df(path_float_index):
     dict_ds = make_dataset(path_float_index)
     pd_ds = pd.DataFrame(dict_ds, index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy'])
-    print(pd_ds)
 
     pd_ds.to_csv(os.getcwd() + '/float_ds.csv')
     return
