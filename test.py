@@ -1,11 +1,12 @@
 import torch
-from architecture import *
+from conv1med import *
+from mlp import *
 
 
-x = torch.rand([1, 7, 200])  # shape of the signal
+x = torch.rand([1])  # shape of the signal
 print(x.shape)
 
-model = Conv1dMed()
+model = MLPDay()
 output = model(x.float())
 
 print(output.shape)

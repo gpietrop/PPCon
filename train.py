@@ -9,7 +9,7 @@ from torch.optim import Adadelta
 from torch.nn.functional import mse_loss
 
 
-from architecture import Conv1dMed
+from conv1med import Conv1dMed
 # from normalization import Normalization
 
 
