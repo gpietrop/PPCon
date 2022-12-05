@@ -11,8 +11,6 @@ from torch.nn.functional import mse_loss
 from conv1med import Conv1dMed
 from mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
-# from normalization import Normalization
-
 
 path = "result"  # result directory
 if not os.path.exists(path):
@@ -33,7 +31,7 @@ testing_lon = torch.rand([1])
 # test_dataset =
 
 alpha = torch.tensor(4e-4)
-lr = 0.001
+lr = 0.1
 epoch = 100
 snaperiod = 20
 
@@ -71,6 +69,9 @@ for ep in range(epoch):
 
         loss_conv = mse_loss(training_y, output)  # MSE
         loss_train.append(loss_conv.item())
+
+        # print(model_conv.conv3.weight.mean())
+        # print(model_mlp_lat.network[0].weight.mean())
 
         print(f"[EPOCH]: {ep + 1}, [LOSS]: {loss_conv.item():.12f}")
         display.clear_output(wait=True)
@@ -111,7 +112,7 @@ for ep in range(epoch):
             loss_conv = mse_loss(testing_y, output_test)
             loss_test.append(loss_conv)
 
-            print(f"[EPOCH]: {ep + 1}, [TEST LOSS]: {loss_conv.item():.12f}")
+            print(f"-----[EPOCH]: {ep + 1}, [TEST LOSS]: {loss_conv.item():.12f}")
             display.clear_output(wait=True)
             f_test.write(f"[EPOCH]: {ep + 1}, [LOSS]: {loss_conv.item():.12f} \n")
 
