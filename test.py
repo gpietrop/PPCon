@@ -44,7 +44,6 @@ from dataset import FloatDataset
 x = FloatDataset(path)
 print(x.df)
 
-
 # temp = a[4]
 # temp = float(temp)
 temp = df.iloc[6, 1][8:-2]
@@ -53,6 +52,7 @@ temp = temp.split(",")
 tens = torch.zeros(200)
 for index in range(len(temp)):
     tens[index] = torch.tensor(float(temp[index]))
+
 
 
 
