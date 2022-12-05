@@ -50,3 +50,4 @@ class FloatDataset(Dataset):
         # depth
 
         return year, day_rad, lat, lon, temp, psal, doxy, label
+
