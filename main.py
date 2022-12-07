@@ -13,7 +13,7 @@ path_float = os.getcwd() + "/float_ds.csv"
 dataset = FloatDataset(path_float)
 
 train_frac = 0.8
-batch_size = 1
+batch_size = 120
 
 train_size = int(train_frac * len(dataset))
 val_size = len(dataset) - train_size

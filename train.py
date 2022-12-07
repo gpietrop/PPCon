@@ -40,24 +40,32 @@ def train_model(train_loader, val_loader, epoch):
 
     for ep in range(epoch):
         for training_year, training_day, training_lat, training_lon, training_temp, training_psal, training_doxy, training_label in train_loader:
-            output_day = model_mlp_day(training_day.float())
+            training_day = training_day.unsqueeze(1)
+            output_day = model_mlp_day(training_day)
+
+            training_year = training_year.unsqueeze(1)
             output_year = model_mlp_year(training_year.float())
+
+            training_lat = training_lat.unsqueeze(1)
             output_lat = model_mlp_lat(training_lat.float())
+
+            training_lon = training_lon.unsqueeze(1)
             output_lon = model_mlp_lon(training_lon.float())
 
-            output_day = output_day.unsqueeze(0).unsqueeze(0)
-            output_year = output_year.unsqueeze(0).unsqueeze(0)
-            output_lat = output_lat.unsqueeze(0).unsqueeze(0)
-            output_lon = output_lon.unsqueeze(0).unsqueeze(0)
-            training_temp = training_temp.unsqueeze(0)
-            training_psal = training_psal.unsqueeze(0)
-            training_doxy = training_doxy.unsqueeze(0)
+            output_day = torch.transpose(output_day.unsqueeze(0), 0, 1)
+            output_year = torch.transpose(output_year.unsqueeze(0), 0, 1)
+            output_lat = torch.transpose(output_lat.unsqueeze(0), 0, 1)
+            output_lon = torch.transpose(output_lon.unsqueeze(0), 0, 1)
+            training_temp = torch.transpose(training_temp.unsqueeze(0), 0, 1)
+            training_psal = torch.transpose(training_psal.unsqueeze(0), 0, 1)
+            training_doxy = torch.transpose(training_doxy.unsqueeze(0), 0, 1)
 
             training_x = torch.cat(
                 (output_day, output_year, output_lat, output_lon, training_temp, training_psal, training_doxy), 1)
+
             output = model_conv(training_x.float())
 
-            training_y = training_doxy
+            training_y = training_doxy  # MOMENTANEO
 
             loss_conv = mse_loss(training_y, output)  # MSE
             loss_train.append(loss_conv.item())
