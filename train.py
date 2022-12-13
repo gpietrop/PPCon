@@ -99,13 +99,20 @@ def train_model(train_loader, val_loader, epoch, device, verbose=False):
         print(f"[==== EPOCH]: {ep + 1}, [AVERAGE LOSS]: {avg_train_loss:.5f}")
         f.write(f"[EPOCH]: {ep + 1}, [LOSS]: {avg_train_loss:.5f} \n")
 
-        # test
+        # Saving model and testing
         if ep % snaperiod == 0:
+            # Saving models at the considered ep
+            torch.save(model_mlp_day.state_dict(), "result/model/model_day_" + str(ep) + ".pt")
+            torch.save(model_mlp_year.state_dict(), "result/model/model_year_" + str(ep) + ".pt")
+            torch.save(model_mlp_lat.state_dict(), "result/model/model_lat_" + str(ep) + ".pt")
+            torch.save(model_mlp_lon.state_dict(), "result/model/model_lon_" + str(ep) + ".pt")
+            torch.save(model_conv.state_dict(), "result/model/model_conv_" + str(ep) + ".pt")
+
+            # Testing model
             model_mlp_day.eval()
             model_mlp_year.eval()
             model_mlp_lat.eval()
             model_mlp_lon.eval()
-
             model_conv.eval()
 
             with torch.no_grad():
@@ -145,7 +152,6 @@ def train_model(train_loader, val_loader, epoch, device, verbose=False):
                                            testing_temp, testing_psal, testing_doxy), 1)
 
                     output_test = model_conv(testing_x.float())
-                    print(output_test.shape)
 
                     loss_conv = mse_loss(testing_nitrate, output_test)
                     loss_test.append(loss_conv)

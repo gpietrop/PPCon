@@ -4,10 +4,15 @@ import numpy as np
 import pandas as pd
 from conv1med import *
 from mlp import *
+import matplotlib.pyplot as plt
 
-x = torch.rand([1])  # shape of the signal
-# print(x.shape)
+x = torch.rand([1, 1, 200])  # shape of the signal
+print(x[0, 0, :].shape)
+x = x[0, 0, :]
+plt.plot(x)
+plt.show()
 
+"""
 model = MLPDay()
 
 # print(model.network[0].weight[0].item())
@@ -52,7 +57,7 @@ temp = temp.split(",")
 tens = torch.zeros(200)
 for index in range(len(temp)):
     tens[index] = torch.tensor(float(temp[index]))
-
+"""
 
 
 
