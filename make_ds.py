@@ -121,3 +121,28 @@ def make_pandas_df(path_float_index):
 
     pd_ds.to_csv(os.getcwd() + '/float_ds.csv')
     return
+
+
+def make_toy_dataset(path_float_index):
+    name_list = pd.read_csv(path_float_index, header=None).to_numpy()[:, 0].tolist()
+    datetime_list = pd.read_csv(path_float_index, header=None).to_numpy()[:, 3].tolist()
+
+    dict_ds = dict()
+
+    for i in range(int(np.size(name_list)/20)):
+        path = "FLOAT_BIO/data/" + name_list[i]
+        if not os.path.exists(path):
+            continue
+        date_time = datetime_list[i]
+        dict_single_float = make_dict_single_float(path, date_time)
+        dict_ds = {**dict_ds, **dict_single_float}
+
+    return dict_ds
+
+
+def make_pandas_toy_df(path_float_index):
+    dict_ds = make_toy_dataset(path_float_index)
+    pd_ds = pd.DataFrame(dict_ds, index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', 'nitrate'])
+
+    pd_ds.to_csv(os.getcwd() + '/toy_ds.csv')
+    return

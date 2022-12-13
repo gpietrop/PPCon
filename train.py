@@ -145,6 +145,7 @@ def train_model(train_loader, val_loader, epoch, device, verbose=False):
                                            testing_temp, testing_psal, testing_doxy), 1)
 
                     output_test = model_conv(testing_x.float())
+                    print(output_test.shape)
 
                     loss_conv = mse_loss(testing_nitrate, output_test)
                     loss_test.append(loss_conv)
