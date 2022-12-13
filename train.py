@@ -1,10 +1,9 @@
 import os
-import math
-from IPython import display
 
 import numpy as np
+from IPython import display
+
 import torch
-import torch.nn as nn
 from torch.optim import Adadelta
 from torch.nn.functional import mse_loss
 
@@ -12,7 +11,7 @@ from conv1med import Conv1dMed
 from mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 
-def train_model(train_loader, val_loader, epoch, device):
+def train_model(train_loader, val_loader, epoch, device, verbose=False):
     path = "result"  # result directory
     if not os.path.exists(path):
         os.mkdir(path)
@@ -88,15 +87,18 @@ def train_model(train_loader, val_loader, epoch, device):
             # print(model_conv.conv3.weight.mean())
             # print(model_mlp_lat.network[0].weight.mean())
 
-            print(f"[EPOCH]: {ep + 1}, [LOSS]: {loss_conv.item():.12f}")
-            display.clear_output(wait=True)
-            f.write(f"[EPOCH]: {ep + 1}, [LOSS]: {loss_conv.item():.12f} \n")
+            if verbose:
+                print(f"[EPOCH]: {ep + 1}, [LOSS]: {loss_conv.item():.12f}")
+                display.clear_output(wait=True)
 
             optimizer.zero_grad()
             loss_conv.backward()
             optimizer.step()
 
             # print(model_conv.conv1.weight[0])
+        avg_train_loss = np.average(loss_train)
+        print(f"[==== EPOCH]: {ep + 1}, [AVERAGE LOSS]: {avg_train_loss:.5f}")
+        f.write(f"[EPOCH]: {ep + 1}, [LOSS]: {avg_train_loss:.5f} \n")
 
         # test
         if ep % snaperiod == 0:
@@ -148,9 +150,13 @@ def train_model(train_loader, val_loader, epoch, device):
                     loss_conv = mse_loss(testing_nitrate, output_test)
                     loss_test.append(loss_conv)
 
-                    print(f"-----[EPOCH]: {ep + 1}, [TEST LOSS]: {loss_conv.item():.12f}")
-                    display.clear_output(wait=True)
-                    f_test.write(f"[EPOCH]: {ep + 1}, [LOSS]: {loss_conv.item():.12f} \n")
+                    if verbose:
+                        print(f"-----[EPOCH]: {ep + 1}, [TEST LOSS]: {loss_conv.item():.12f}")
+                        display.clear_output(wait=True)
+
+        avg_test_loss = np.average(loss_test)
+        print(f"[==== EPOCH]: {ep + 1}, [AVERAGE TEST LOSS]: {avg_test_loss:.5f}")
+        f_test.write(f"[EPOCH]: {ep + 1}, [TEST LOSS]: {avg_test_loss:.5f} \n")
 
     f.close()
     f_test.close()

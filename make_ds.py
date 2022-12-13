@@ -12,6 +12,29 @@ def find_nearest(array, value):
     return idx
 
 
+def find_nearest_attention(array, value, var):
+    fill_values = [99999.0000]
+    check_value = 99999.0000
+    check_loop = 0
+    excptIndx = []
+    array = np.asarray(array)
+    while check_value in fill_values and check_loop < len(array):
+        differences = np.abs(array - value)
+
+        m = np.zeros(differences.size, dtype=bool)
+        m[excptIndx] = True
+        differences_mask = np.ma.array(differences, mask=m)
+
+        idx = np.argmin(differences_mask)
+
+        check_value = var[idx]
+        check_loop += 1
+        excptIndx.append(idx)
+    if check_loop == len(array):
+        return None
+    return idx
+
+
 def discretize(pres, var, max_pres=2000, interval=10):
     """
     function that take as input a profile, the corresponding pres and create a tensor
@@ -25,7 +48,9 @@ def discretize(pres, var, max_pres=2000, interval=10):
 
     for i in range(size):
         pressure_discretize = discretization_pres[i]
-        idx = find_nearest(pres, pressure_discretize)
+        idx = find_nearest_attention(pres, pressure_discretize, var)
+        if idx is None:
+            return None
         out[i] = torch.from_numpy(np.asarray(var[idx]))
 
     return out
@@ -63,18 +88,12 @@ def make_dict_single_float(path, date_time):
     nitrate_df = ds["NITRATE"][:].data[0]
 
     temp = discretize(pres_df, temp_df)
-    if 99999. in temp:
-        return dict()
     psal = discretize(pres_df, psal_df)
-    if 99999. in psal:
-        return dict()
     doxy = discretize(pres_df, doxy_df)
-    if 99999. in doxy:
-        return dict()
     nitrate = discretize(nitrate_df, doxy_df)
-    if 99999. in nitrate:
-        return dict()
     name_float = path[8:-3]
+    if temp is None or psal is None or doxy is None or nitrate is None:
+        return dict()
     dict_float = {name_float: [year, day_rad, lat, lon, temp, psal, doxy, nitrate]}
     return dict_float
 
@@ -102,5 +121,3 @@ def make_pandas_df(path_float_index):
 
     pd_ds.to_csv(os.getcwd() + '/float_ds.csv')
     return
-
-
