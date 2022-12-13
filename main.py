@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 import torch
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 
 from make_ds import make_pandas_df
 from train import train_model
@@ -31,5 +31,4 @@ val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 print(f"We will use {device}")
 
-train_model(train_loader, val_loader, 1, device)
-# """
+train_model(train_loader, val_loader, 100, device)

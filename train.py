@@ -37,12 +37,11 @@ def train_model(train_loader, val_loader, epoch, device, verbose=False):
         model_mlp_lon.parameters()) + list(model_conv.parameters())
     optimizer = Adadelta(params=params, lr=lr)
 
-    loss_train = []
-    loss_test = []
-
     f, f_test = open(path + "/train_loss.txt", "w+"), open(path + "/test_loss.txt", "w+")
 
     for ep in range(epoch):
+        loss_train = []
+        loss_test = []
         for training_year, training_day, training_lat, training_lon, training_temp, training_psal, training_doxy, training_nitrate in train_loader:
 
             # move data to device
@@ -154,9 +153,9 @@ def train_model(train_loader, val_loader, epoch, device, verbose=False):
                         print(f"-----[EPOCH]: {ep + 1}, [TEST LOSS]: {loss_conv.item():.12f}")
                         display.clear_output(wait=True)
 
-        avg_test_loss = np.average(loss_test)
-        print(f"[==== EPOCH]: {ep + 1}, [AVERAGE TEST LOSS]: {avg_test_loss:.5f}")
-        f_test.write(f"[EPOCH]: {ep + 1}, [TEST LOSS]: {avg_test_loss:.5f} \n")
+            avg_test_loss = np.average(loss_test)
+            print(f"[==== EPOCH]: {ep + 1}, [AVERAGE TEST LOSS]: {avg_test_loss:.5f}")
+            f_test.write(f"[EPOCH]: {ep + 1}, [TEST LOSS]: {avg_test_loss:.5f} \n")
 
     f.close()
     f_test.close()
