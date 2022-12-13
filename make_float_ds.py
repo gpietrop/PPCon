@@ -58,13 +58,17 @@ def make_dict_single_float(path, date_time):
     if "DOXY" not in ds.variables.keys():
         return dict()
     doxy_df = ds["DOXY"][:].data[0]
+    if "NITRATE" not in ds.variables.keys():
+        return dict()
+    nitrate_df = ds["NITRATE"][:].data[0]
 
     temp = discretize(pres_df, temp_df)
     psal = discretize(pres_df, psal_df)
     doxy = discretize(pres_df, doxy_df)
+    nitrate = discretize(nitrate_df, doxy_df)
 
     name_float = path[8:-3]
-    dict_float = {name_float: [year, day_rad, lat, lon, temp, psal, doxy]}
+    dict_float = {name_float: [year, day_rad, lat, lon, temp, psal, doxy, nitrate]}
     return dict_float
 
 
@@ -87,7 +91,7 @@ def make_dataset(path_float_index):
 
 def make_pandas_df(path_float_index):
     dict_ds = make_dataset(path_float_index)
-    pd_ds = pd.DataFrame(dict_ds, index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy'])
+    pd_ds = pd.DataFrame(dict_ds, index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', 'nitrate'])
 
     pd_ds.to_csv(os.getcwd() + '/float_ds.csv')
     return

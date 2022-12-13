@@ -12,7 +12,7 @@ from conv1med import Conv1dMed
 from mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 
-def train_model(train_loader, val_loader, epoch):
+def train_model(train_loader, val_loader, epoch, device):
     path = "result"  # result directory
     if not os.path.exists(path):
         os.mkdir(path)
@@ -25,8 +25,13 @@ def train_model(train_loader, val_loader, epoch):
     model_mlp_year = MLPYear()
     model_mlp_lat = MLPLat()
     model_mlp_lon = MLPLon()
-
     model_conv = Conv1dMed()
+
+    model_mlp_day.to(device)
+    model_mlp_year.to(device)
+    model_mlp_lat.to(device)
+    model_mlp_lon.to(device)
+    model_conv.to(device)
 
     params = list(model_mlp_day.parameters()) + list(model_mlp_year.parameters()) + list(
         model_mlp_lat.parameters()) + list(
@@ -39,7 +44,18 @@ def train_model(train_loader, val_loader, epoch):
     f, f_test = open(path + "/train_loss.txt", "w+"), open(path + "/test_loss.txt", "w+")
 
     for ep in range(epoch):
-        for training_year, training_day, training_lat, training_lon, training_temp, training_psal, training_doxy, training_label in train_loader:
+        for training_year, training_day, training_lat, training_lon, training_temp, training_psal, training_doxy, training_nitrate in train_loader:
+
+            # move data to device
+            training_year = training_year.to(device)
+            training_day = training_day.to(device)
+            training_lat = training_lat.to(device)
+            training_lon = training_lon.to(device)
+            training_temp = training_temp.to(device)
+            training_psal = training_psal.to(device)
+            training_doxy = training_doxy.to(device)
+            training_nitrate = training_nitrate.to(device)
+
             training_day = training_day.unsqueeze(1)
             output_day = model_mlp_day(training_day)
 
@@ -59,15 +75,14 @@ def train_model(train_loader, val_loader, epoch):
             training_temp = torch.transpose(training_temp.unsqueeze(0), 0, 1)
             training_psal = torch.transpose(training_psal.unsqueeze(0), 0, 1)
             training_doxy = torch.transpose(training_doxy.unsqueeze(0), 0, 1)
+            training_nitrate = torch.transpose(training_nitrate.unsqueeze(0), 0, 1)
 
             training_x = torch.cat(
                 (output_day, output_year, output_lat, output_lon, training_temp, training_psal, training_doxy), 1)
 
             output = model_conv(training_x.float())
 
-            training_y = training_doxy  # MOMENTANEO
-
-            loss_conv = mse_loss(training_y, output)  # MSE
+            loss_conv = mse_loss(training_nitrate, output)  # MSE
             loss_train.append(loss_conv.item())
 
             # print(model_conv.conv3.weight.mean())
@@ -82,6 +97,7 @@ def train_model(train_loader, val_loader, epoch):
             optimizer.step()
 
             # print(model_conv.conv1.weight[0])
+
         # test
         if ep % snaperiod == 0:
             model_mlp_day.eval()
@@ -92,28 +108,44 @@ def train_model(train_loader, val_loader, epoch):
             model_conv.eval()
 
             with torch.no_grad():
-                for testing_year, testing_day, testing_lat, testing_lon, testing_temp, testing_psal, testing_doxy, testing_label in val_loader:
-                    output_day_test = model_mlp_day(testing_day.float())
-                    output_year_test = model_mlp_year(testing_year.float())
-                    output_lat_test = model_mlp_lat(testing_lat.float())
-                    output_lon_test = model_mlp_lon(testing_lon.float())
+                for testing_year, testing_day, testing_lat, testing_lon, testing_temp, testing_psal, testing_doxy, testing_nitrate in val_loader:
 
-                    output_day_test = output_day_test.unsqueeze(0).unsqueeze(0)
-                    output_year_test = output_year_test.unsqueeze(0).unsqueeze(0)
-                    output_lat_test = output_lat_test.unsqueeze(0).unsqueeze(0)
-                    output_lon_test = output_lon_test.unsqueeze(0).unsqueeze(0)
-                    testing_temp = testing_temp.unsqueeze(0)
-                    testing_psal = testing_psal.unsqueeze(0)
-                    testing_doxy = testing_doxy.unsqueeze(0)
+                    testing_year = testing_year.to(device)
+                    testing_day = testing_day.to(device)
+                    testing_lat = testing_lat.to(device)
+                    testing_lon = testing_lon.to(device)
+                    testing_temp = testing_temp.to(device)
+                    testing_psal = testing_psal.to(device)
+                    testing_doxy = testing_doxy.to(device)
+                    testing_nitrate = testing_nitrate.to(device)
+
+                    testing_day = testing_day.unsqueeze(1)
+                    output_day_test = model_mlp_day(testing_day)
+
+                    testing_year = testing_year.unsqueeze(1)
+                    output_year_test = model_mlp_year(testing_year)
+
+                    testing_lat = testing_lat.unsqueeze(1)
+                    output_lat_test = model_mlp_lat(testing_lat)
+
+                    testing_lon = testing_lon.unsqueeze(1)
+                    output_lon_test = model_mlp_lon(testing_lon)
+
+                    output_day_test = torch.transpose(output_day_test.unsqueeze(0), 0, 1)
+                    output_year_test = torch.transpose(output_year_test.unsqueeze(0), 0, 1)
+                    output_lat_test = torch.transpose(output_lat_test.unsqueeze(0), 0, 1)
+                    output_lon_test = torch.transpose(output_lon_test.unsqueeze(0), 0, 1)
+                    testing_temp = torch.transpose(testing_temp.unsqueeze(0), 0, 1)
+                    testing_psal = torch.transpose(testing_psal.unsqueeze(0), 0, 1)
+                    testing_doxy = torch.transpose(testing_doxy.unsqueeze(0), 0, 1)
+                    testing_nitrate = torch.transpose(testing_nitrate.unsqueeze(0), 0, 1)
 
                     testing_x = torch.cat((output_day_test, output_year_test, output_lat_test, output_lon_test,
                                            testing_temp, testing_psal, testing_doxy), 1)
 
                     output_test = model_conv(testing_x.float())
 
-                    testing_y = testing_doxy
-
-                    loss_conv = mse_loss(testing_y, output_test)
+                    loss_conv = mse_loss(testing_nitrate, output_test)
                     loss_test.append(loss_conv)
 
                     print(f"-----[EPOCH]: {ep + 1}, [TEST LOSS]: {loss_conv.item():.12f}")
