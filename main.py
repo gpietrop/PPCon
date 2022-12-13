@@ -4,16 +4,17 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from make_float_ds import make_pandas_df
+from make_ds import make_pandas_df
 from train import train_model
 from dataset import FloatDataset
 
 
-# make_pandas_df(os.getcwd() + '/FLOAT_BIO/data/Float_Index.txt')
+make_pandas_df(os.getcwd() + '/FLOAT_BIO/data/Float_Index.txt')
 path_float = os.getcwd() + "/float_ds.csv"
 dataset = FloatDataset(path_float)
 # print(pd.read_csv(path_float))
-# """
+
+"""
 train_frac = 0.8
 batch_size = 12
 
@@ -31,4 +32,4 @@ device = "cuda:0" if torch.cuda.is_available() else "cpu"
 print(f"We will use {device}")
 
 train_model(train_loader, val_loader, 1, device)
-# """
+"""

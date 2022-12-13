@@ -63,10 +63,17 @@ def make_dict_single_float(path, date_time):
     nitrate_df = ds["NITRATE"][:].data[0]
 
     temp = discretize(pres_df, temp_df)
+    if 99999. in temp:
+        return dict()
     psal = discretize(pres_df, psal_df)
+    if 99999. in psal:
+        return dict()
     doxy = discretize(pres_df, doxy_df)
+    if 99999. in doxy:
+        return dict()
     nitrate = discretize(nitrate_df, doxy_df)
-
+    if 99999. in nitrate:
+        return dict()
     name_float = path[8:-3]
     dict_float = {name_float: [year, day_rad, lat, lon, temp, psal, doxy, nitrate]}
     return dict_float
