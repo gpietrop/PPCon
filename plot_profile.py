@@ -5,9 +5,9 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 
 # from conv1med import Conv1dMed
-from conv1med2 import Conv1dMed
+from architecture.conv1med2 import Conv1dMed
 from dataset import FloatDataset
-from mlp import MLPDay, MLPYear, MLPLon, MLPLat
+from architecture.mlp import MLPDay, MLPYear, MLPLon, MLPLat
 
 
 # Set hyperparameters

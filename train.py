@@ -8,8 +8,8 @@ from torch.optim import Adadelta
 from torch.nn.functional import mse_loss
 
 # from conv1med import Conv1dMed
-from conv1med2 import Conv1dMed
-from mlp import MLPDay, MLPYear, MLPLat, MLPLon
+from architecture.conv1med2 import Conv1dMed
+from architecture.mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 
 def train_model(train_loader, val_loader, epoch, device, verbose=False):

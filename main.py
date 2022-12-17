@@ -1,11 +1,10 @@
 import os
 
-import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 
 # from make_ds import make_pandas_df, make_pandas_toy_df
-from make_superfloat_ds import make_pandas_df, make_pandas_toy_df
+from make_ds.make_superfloat_ds import make_pandas_toy_df
 from train import train_model
 from dataset import FloatDataset
 

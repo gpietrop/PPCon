@@ -1,9 +1,4 @@
 import torch
-import os
-import numpy as np
-import pandas as pd
-from conv1med import *
-from mlp import *
 import matplotlib.pyplot as plt
 
 x = torch.rand([1, 1, 200])  # shape of the signal
