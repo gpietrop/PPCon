@@ -11,7 +11,7 @@ from mlp import MLPDay, MLPYear, MLPLon, MLPLat
 
 
 # Set hyperparameters
-ep = 10
+ep = 20
 
 # Path of the saved models
 path_model_day = "result/model/model_day_" + str(ep) + ".pt"
@@ -44,7 +44,7 @@ model.eval()
 # """
 
 # Upload the input ds
-path_float = os.getcwd() + "/toy_ds.csv"
+path_float = os.getcwd() + "/ds/toy_ds_sf.csv"
 dataset = FloatDataset(path_float)
 ds = DataLoader(dataset, shuffle=True)
 

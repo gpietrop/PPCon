@@ -4,15 +4,17 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 
-from make_ds import make_pandas_df, make_pandas_toy_df
+# from make_ds import make_pandas_df, make_pandas_toy_df
+from make_superfloat_ds import make_pandas_df, make_pandas_toy_df
 from train import train_model
 from dataset import FloatDataset
 
 
-# make_pandas_df(os.getcwd() + '/FLOAT_BIO/data/Float_Index.txt')
-# make_pandas_toy_df(os.getcwd() + '/FLOAT_BIO/data/Float_Index.txt')
+# make_pandas_df(os.getcwd() + '/SUPERFLOAT/Float_Index.txt')
+make_pandas_toy_df(os.getcwd() + '/SUPERFLOAT/Float_Index.txt')
 
-path_float = os.getcwd() + "/toy_ds.csv"
+
+path_float = os.getcwd() + "/ds/toy_ds_sf.csv"
 dataset = FloatDataset(path_float)
 # a = pd.read_csv(path_float)
 # print(a)
