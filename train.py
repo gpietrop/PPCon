@@ -7,7 +7,8 @@ import torch
 from torch.optim import Adadelta
 from torch.nn.functional import mse_loss
 
-from conv1med import Conv1dMed
+# from conv1med import Conv1dMed
+from conv1med2 import Conv1dMed
 from mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 
@@ -18,13 +19,13 @@ def train_model(train_loader, val_loader, epoch, device, verbose=False):
 
     lr = 0.1
 
-    snaperiod = 20
+    snaperiod = 10
 
     model_mlp_day = MLPDay()
     model_mlp_year = MLPYear()
     model_mlp_lat = MLPLat()
     model_mlp_lon = MLPLon()
-    model_conv = Conv1dMed()
+    model_conv = Conv1dMed() # GoodfellowNet()
 
     model_mlp_day.to(device)
     model_mlp_year.to(device)

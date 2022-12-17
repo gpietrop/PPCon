@@ -4,13 +4,14 @@ import torch
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 
-from conv1med import Conv1dMed
+# from conv1med import Conv1dMed
+from conv1med2 import Conv1dMed
 from dataset import FloatDataset
 from mlp import MLPDay, MLPYear, MLPLon, MLPLat
 
 
 # Set hyperparameters
-ep = 20
+ep = 10
 
 # Path of the saved models
 path_model_day = "result/model/model_day_" + str(ep) + ".pt"

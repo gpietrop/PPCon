@@ -18,7 +18,6 @@ dataset = FloatDataset(path_float)
 # print(a)
 # print(a.iloc[-1,  191])
 
-
 train_frac = 0.8
 batch_size = 12
 
