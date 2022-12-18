@@ -1,5 +1,4 @@
 import os
-from datetime import date
 
 import numpy as np
 from IPython import display
@@ -13,10 +12,7 @@ from architecture.conv1med2 import Conv1dMed
 from architecture.mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 
-def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, verbose=False):
-    path = "result"  # result directory
-    if not os.path.exists(path):
-        os.mkdir(path)
+def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, save_dir, verbose=False):
 
     model_mlp_day = MLPDay()
     model_mlp_year = MLPYear()
@@ -35,7 +31,7 @@ def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, verbose=
         model_mlp_lon.parameters()) + list(model_conv.parameters())
     optimizer = Adadelta(params=params, lr=lr)
 
-    f, f_test = open(path + "/train_loss.txt", "w+"), open(path + "/test_loss.txt", "w+")
+    f, f_test = open(save_dir + "/train_loss.txt", "w+"), open(save_dir + "/test_loss.txt", "w+")
 
     for ep in range(epoch):
         loss_train = []
@@ -99,9 +95,7 @@ def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, verbose=
 
         # Saving model and testing
         if ep % snaperiod == 0:
-            save_dir = "result/model/" + str(date.today())
-            if not os.path.exists(save_dir):
-                os.mkdir(save_dir)
+
             # Saving models at the considered ep
             torch.save(model_mlp_day.state_dict(), save_dir + "/model_day_" + str(ep) + ".pt")
             torch.save(model_mlp_year.state_dict(), save_dir + "/model_year_" + str(ep) + ".pt")
