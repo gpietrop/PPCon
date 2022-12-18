@@ -1,38 +1,48 @@
 import os
+import argparse
 
 import torch
 from torch.utils.data import DataLoader
 
-# from make_ds import make_pandas_df, make_pandas_toy_df
-from make_ds.make_superfloat_ds import make_pandas_toy_df
 from train import train_model
 from dataset import FloatDataset
 
 
-# make_pandas_df(os.getcwd() + '/SUPERFLOAT/Float_Index.txt')
-make_pandas_toy_df(os.getcwd() + '/SUPERFLOAT/Float_Index.txt')
+# Setting the computation device
+from utils import make_ds
 
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
+print(f"We will use {device}")
 
-path_float = os.getcwd() + "/ds/toy_ds_sf.csv"
-dataset = FloatDataset(path_float)
-# a = pd.read_csv(path_float)
-# print(a)
-# print(a.iloc[-1,  191])
+# Create the parser
+parser = argparse.ArgumentParser()
+parser.add_argument('--training_folder', type=str, default="SUPERFLOAT", choices=["SUPERFLOAT", "CORIOLIS"])
+parser.add_argument('--batch_size', type=int, default=12)
+parser.add_argument('--epochs', type=int, default=10**3)
+parser.add_argument('--lr', type=float, default=0.01)
+parser.add_argument('--snaperiod', type=int, default=25)
+
+# Parsing arguments
+args = parser.parse_args()
+training_folder = args.training_folder
+batch_size = args.batch_size
+epochs = args.epochs
+lr = args.lr
+snaperiod = args.snaperiod
+
+# Creating the correct dataframe according to the training folder
+make_ds(training_folder, flag_complete=0, flag_toy=1)
+
+path_ds = os.getcwd() + "/ds/toy_ds_sf.csv"
+dataset = FloatDataset(path_ds)
 
 train_frac = 0.8
-batch_size = 12
-
 train_size = int(train_frac * len(dataset))
 val_size = len(dataset) - train_size
 
 train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
 
-
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
-# Setting the computation device
-device = "cuda:0" if torch.cuda.is_available() else "cpu"
-print(f"We will use {device}")
-
-train_model(train_loader, val_loader, 100, device)
+train_model(train_loader, val_loader, epoch=epochs, lr=lr, snaperiod=snaperiod, device=device)

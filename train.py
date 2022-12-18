@@ -12,20 +12,16 @@ from architecture.conv1med2 import Conv1dMed
 from architecture.mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 
-def train_model(train_loader, val_loader, epoch, device, verbose=False):
+def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, verbose=False):
     path = "result"  # result directory
     if not os.path.exists(path):
         os.mkdir(path)
-
-    lr = 0.1
-
-    snaperiod = 10
 
     model_mlp_day = MLPDay()
     model_mlp_year = MLPYear()
     model_mlp_lat = MLPLat()
     model_mlp_lon = MLPLon()
-    model_conv = Conv1dMed() # GoodfellowNet()
+    model_conv = Conv1dMed()
 
     model_mlp_day.to(device)
     model_mlp_year.to(device)

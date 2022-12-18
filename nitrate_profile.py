@@ -3,7 +3,7 @@ import os
 import netCDF4 as nc
 import pandas as pd
 
-from make_ds.make_ds import discretize
+from make_ds.make_coriolis_ds import discretize
 
 path = os.getcwd() + '/SUPERFLOAT/Float_Index.txt'
 name_list = pd.read_csv(path, header=None).to_numpy()[:, 0].tolist()

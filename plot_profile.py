@@ -11,7 +11,7 @@ from architecture.mlp import MLPDay, MLPYear, MLPLon, MLPLat
 
 
 # Set hyperparameters
-ep = 20
+ep = 0
 
 # Path of the saved models
 path_model_day = "result/model/model_day_" + str(ep) + ".pt"

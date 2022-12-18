@@ -95,7 +95,7 @@ def make_dataset(path_float_index):
     dict_ds = dict()
 
     for i in range(np.size(name_list)):
-        path = "SUPERFLOAT/" + name_list[i]
+        path = os.getcwd() + "/ds/SUPERFLOAT/" + name_list[i]
         if not os.path.exists(path):
             continue
         date_time = datetime_list[i]
@@ -120,7 +120,7 @@ def make_toy_dataset(path_float_index):
     dict_ds = dict()
 
     for i in range(int(np.size(name_list)/20)):
-        path = "SUPERFLOAT/" + name_list[i]
+        path = os.getcwd() + "/ds/SUPERFLOAT/" + name_list[i]
         if not os.path.exists(path):
             continue
         date_time = datetime_list[i]
