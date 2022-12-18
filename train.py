@@ -1,4 +1,5 @@
 import os
+from datetime import date
 
 import numpy as np
 from IPython import display
@@ -98,12 +99,15 @@ def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, verbose=
 
         # Saving model and testing
         if ep % snaperiod == 0:
+            save_dir = "result/model/" + str(date.today())
+            if not os.path.exists(save_dir):
+                os.mkdir(save_dir)
             # Saving models at the considered ep
-            torch.save(model_mlp_day.state_dict(), "result/model/model_day_" + str(ep) + ".pt")
-            torch.save(model_mlp_year.state_dict(), "result/model/model_year_" + str(ep) + ".pt")
-            torch.save(model_mlp_lat.state_dict(), "result/model/model_lat_" + str(ep) + ".pt")
-            torch.save(model_mlp_lon.state_dict(), "result/model/model_lon_" + str(ep) + ".pt")
-            torch.save(model_conv.state_dict(), "result/model/model_conv_" + str(ep) + ".pt")
+            torch.save(model_mlp_day.state_dict(), save_dir + "/model_day_" + str(ep) + ".pt")
+            torch.save(model_mlp_year.state_dict(), save_dir + "/model_year_" + str(ep) + ".pt")
+            torch.save(model_mlp_lat.state_dict(), save_dir + "/model_lat_" + str(ep) + ".pt")
+            torch.save(model_mlp_lon.state_dict(), save_dir + "/model_lon_" + str(ep) + ".pt")
+            torch.save(model_conv.state_dict(), save_dir + "/model_conv_" + str(ep) + ".pt")
 
             # Testing model
             model_mlp_day.eval()

@@ -34,7 +34,7 @@ class FloatDataset(Dataset):
         try:
             self.samples = self.df.iloc[:, index + 1].tolist()  # Select sample
         except Exception as error:
-            print('Caught this error: ' + repr(error))
+            pass
 
         # self.samples = self.df.iloc[:, index + 1].tolist()  # Select sample
 

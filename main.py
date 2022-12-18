@@ -17,6 +17,7 @@ print(f"We will use {device}")
 # Create the parser
 parser = argparse.ArgumentParser()
 parser.add_argument('--training_folder', type=str, default="SUPERFLOAT", choices=["SUPERFLOAT", "CORIOLIS"])
+parser.add_argument('--flag_toy', type=bool, default=False)
 parser.add_argument('--batch_size', type=int, default=12)
 parser.add_argument('--epochs', type=int, default=10**3)
 parser.add_argument('--lr', type=float, default=0.01)
@@ -25,6 +26,7 @@ parser.add_argument('--snaperiod', type=int, default=25)
 # Parsing arguments
 args = parser.parse_args()
 training_folder = args.training_folder
+flag_toy = 0
 batch_size = args.batch_size
 epochs = args.epochs
 lr = args.lr
@@ -33,7 +35,8 @@ snaperiod = args.snaperiod
 # Creating the correct dataframe according to the training folder
 make_ds(training_folder, flag_complete=0, flag_toy=1)
 
-path_ds = os.getcwd() + "/ds/toy_ds_sf.csv"
+if training_folder == "SUPERFLOAT":
+    path_ds = os.getcwd() + "/ds/toy_ds_sf.csv" if flag_toy else os.getcwd() + "/ds/float_ds_sf.csv"
 dataset = FloatDataset(path_ds)
 
 train_frac = 0.8
