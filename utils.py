@@ -1,5 +1,7 @@
 import os
 
+import pandas as pd
+
 
 def make_ds(training_folder, flag_complete=1, flag_toy=1):
     if training_folder == "SUPERFLOAT":
@@ -24,3 +26,16 @@ def make_ds(training_folder, flag_complete=1, flag_toy=1):
             print("coriolis toy ds created")
 
     return
+
+
+def save_ds_info(training_folder, flag_toy, batch_size, epochs, lr, save_dir):
+    dict_info = {'train_ds': training_folder,
+                 'is_toy': flag_toy,
+                 'batch_size': batch_size,
+                 'epoch': epochs,
+                 'lr': lr}
+    pd_ds = pd.DataFrame(dict_info)
+    pd_ds.to_csv(save_dir + '/info.csv')
+
+    return
+

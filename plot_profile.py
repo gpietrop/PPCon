@@ -6,7 +6,11 @@ from architecture.conv1med2 import Conv1dMed
 from architecture.mlp import MLPDay, MLPYear, MLPLon, MLPLat
 
 
-def plot_profiles(ds, dir_model, ep=100):
+def plot_profiles(ds, dir, ep=100):
+
+    dir_model = dir + "/model"
+    dir_profile = dir + "/profile"
+
     # Path of the saved models
     path_model_day = dir_model + "/model_day_" + str(ep) + ".pt"
     path_model_year = dir_model + "/model_year_" + str(ep) + ".pt"
@@ -64,7 +68,8 @@ def plot_profiles(ds, dir_model, ep=100):
         plt.plot(output_test[0, 0, :].detach().numpy(), label="generated nitrate")
         plt.plot(nitrate[0, 0, :].detach().numpy(), label="measured nitrate")
         plt.legend()
-        plt.show()
+        plt.savefig(dir_profile + f"/profile_{year}_{day_rad}_{round(lat, 2)}_{round(lon, 2)}.png")
+        # plt.show()
         plt.close()
 
 

@@ -11,7 +11,7 @@ from plot_profile import plot_profiles
 
 
 # Setting the computation device
-from utils import make_ds
+from utils import make_ds, save_ds_info
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 print(f"We will use {device}")
@@ -49,18 +49,18 @@ train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size,
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
-save_dir = "result-dp/"
-if not os.path.exists(save_dir):
-    os.mkdir(save_dir)
-save_dir = save_dir + "/model/"
+save_dir = os.getcwd() + "result-dp/"
 if not os.path.exists(save_dir):
     os.mkdir(save_dir)
 save_dir = save_dir + str(date.today())
 if not os.path.exists(save_dir):
     os.mkdir(save_dir)
 
+# ===== Saving models hyperparameters
+save_ds_info(training_folder, flag_toy, batch_size, epochs, lr, save_dir)
+
 # ===== train the model
 train_model(train_loader, val_loader, epoch=epochs, lr=lr, snaperiod=snaperiod, save_dir=save_dir, device=device)
 
 # ===== plot the results obtained on the validation set
-# plot_profiles(val_loader, dir_model=save_dir, ep=100)
+plot_profiles(DataLoader(val_dataset, batch_size=1, shuffle=True), dir=save_dir, ep=epochs)

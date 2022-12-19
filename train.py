@@ -14,6 +14,8 @@ from architecture.mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, save_dir, verbose=False):
 
+    save_dir = save_dir + "/model/"
+
     model_mlp_day = MLPDay()
     model_mlp_year = MLPYear()
     model_mlp_lat = MLPLat()
