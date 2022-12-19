@@ -5,13 +5,13 @@ import argparse
 import torch
 from torch.utils.data import DataLoader
 
-from utils import make_ds
 from train import train_model
 from dataset import FloatDataset
 from plot_profile import plot_profiles
 
 
 # Setting the computation device
+from utils import make_ds
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 print(f"We will use {device}")
@@ -35,7 +35,7 @@ lr = args.lr
 snaperiod = args.snaperiod
 
 # ===== Creating the correct dataframe according to the training folder
-# make_ds(training_folder, flag_complete=0, flag_toy=1)
+make_ds(training_folder, flag_complete=1, flag_toy=1)
 
 if training_folder == "SUPERFLOAT":
     path_ds = os.getcwd() + "/ds/toy_ds_sf.csv" if flag_toy else os.getcwd() + "/ds/float_ds_sf.csv"
@@ -49,12 +49,18 @@ train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size,
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
-save_dir = "result/model/" + str(date.today())
+save_dir = "result-dp/"
+if not os.path.exists(save_dir):
+    os.mkdir(save_dir)
+save_dir = save_dir + "/model/"
+if not os.path.exists(save_dir):
+    os.mkdir(save_dir)
+save_dir = save_dir + str(date.today())
 if not os.path.exists(save_dir):
     os.mkdir(save_dir)
 
 # ===== train the model
-# train_model(train_loader, val_loader, epoch=epochs, lr=lr, snaperiod=snaperiod, save_dir=save_dir, device=device)
+train_model(train_loader, val_loader, epoch=epochs, lr=lr, snaperiod=snaperiod, save_dir=save_dir, device=device)
 
 # ===== plot the results obtained on the validation set
-plot_profiles(val_loader, dir_model=save_dir, ep=100)
+# plot_profiles(val_loader, dir_model=save_dir, ep=100)
