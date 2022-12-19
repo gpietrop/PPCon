@@ -20,6 +20,7 @@ def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, save_dir
     model_mlp_lon = MLPLon()
     model_conv = Conv1dMed()
 
+    # Moving models to GPU when available
     model_mlp_day.to(device)
     model_mlp_year.to(device)
     model_mlp_lat.to(device)
@@ -36,9 +37,16 @@ def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, save_dir
     for ep in range(epoch):
         loss_train = []
         loss_test = []
+        # Models in training mode
+        model_mlp_day.train()
+        model_mlp_year.train()
+        model_mlp_lat.train()
+        model_mlp_lon.train()
+        model_conv.train()
+
         for training_year, training_day, training_lat, training_lon, training_temp, training_psal, training_doxy, training_nitrate in train_loader:
 
-            # move data to device
+            # Moving tensors to GPU when available
             training_year = training_year.to(device)
             training_day = training_day.to(device)
             training_lat = training_lat.to(device)
@@ -77,9 +85,6 @@ def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, save_dir
             loss_conv = mse_loss(training_nitrate, output)  # MSE
             loss_train.append(loss_conv.item())
 
-            # print(model_conv.conv3.weight.mean())
-            # print(model_mlp_lat.network[0].weight.mean())
-
             if verbose:
                 print(f"[EPOCH]: {ep + 1}, [LOSS]: {loss_conv.item():.12f}")
                 display.clear_output(wait=True)
@@ -88,7 +93,6 @@ def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, save_dir
             loss_conv.backward()
             optimizer.step()
 
-            # print(model_conv.conv1.weight[0])
         avg_train_loss = np.average(loss_train)
         print(f"[==== EPOCH]: {ep + 1}, [AVERAGE LOSS]: {avg_train_loss:.5f}")
         f.write(f"[EPOCH]: {ep + 1}, [LOSS]: {avg_train_loss:.5f} \n")
@@ -96,14 +100,14 @@ def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, save_dir
         # Saving model and testing
         if ep % snaperiod == 0:
 
-            # Saving models at the considered ep
+            # Saving models at epoch ep
             torch.save(model_mlp_day.state_dict(), save_dir + "/model_day_" + str(ep) + ".pt")
             torch.save(model_mlp_year.state_dict(), save_dir + "/model_year_" + str(ep) + ".pt")
             torch.save(model_mlp_lat.state_dict(), save_dir + "/model_lat_" + str(ep) + ".pt")
             torch.save(model_mlp_lon.state_dict(), save_dir + "/model_lon_" + str(ep) + ".pt")
             torch.save(model_conv.state_dict(), save_dir + "/model_conv_" + str(ep) + ".pt")
 
-            # Testing model
+            # Model in validation mode
             model_mlp_day.eval()
             model_mlp_year.eval()
             model_mlp_lat.eval()
@@ -113,6 +117,7 @@ def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, save_dir
             with torch.no_grad():
                 for testing_year, testing_day, testing_lat, testing_lon, testing_temp, testing_psal, testing_doxy, testing_nitrate in val_loader:
 
+                    # Moving tensors to GPU when available
                     testing_year = testing_year.to(device)
                     testing_day = testing_day.to(device)
                     testing_lat = testing_lat.to(device)
@@ -161,5 +166,3 @@ def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, save_dir
 
     f.close()
     f_test.close()
-
-# torch.save(model.state_dict(), "model/model2015/model_step1_ep_" + str(epoch_c + epoch_pretrain) + ".pt")
