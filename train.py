@@ -164,7 +164,7 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, snaperiod, device,
                         print(f"-----[EPOCH]: {ep + 1}, [TEST LOSS]: {loss_conv.item():.12f}")
                         display.clear_output(wait=True)
 
-            avg_test_loss = np.average(loss_test)
+            avg_test_loss = np.average([loss_.cpu() for loss_ in loss_test])
             print(f"[==== EPOCH]: {ep + 1}, [AVERAGE TEST LOSS]: {avg_test_loss:.5f}")
             f_test.write(f"[EPOCH]: {ep + 1}, [TEST LOSS]: {avg_test_loss:.5f} \n")
 
