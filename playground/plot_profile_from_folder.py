@@ -12,7 +12,7 @@ from dataset import FloatDataset
 # Where to search the model
 dir = "result-dp/"
 date = "2022-12-20/"
-ep = 0
+ep = 525
 
 # Upload the input ds
 path_float = "/home/gpietropolli/Desktop/canyon-float/ds/float_ds_sf.csv"

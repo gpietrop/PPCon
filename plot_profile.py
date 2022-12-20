@@ -48,12 +48,6 @@ def plot_profiles(ds, dir, ep=100):
     model = Conv1dMed(dp_rate=dp_rate)
     model.load_state_dict(torch.load(path_model_conv))
     model.eval()
-    # """
-
-    # Upload the input ds
-    # path_float = os.getcwd() + "/ds/toy_ds_sf.csv"
-    # dataset = FloatDataset(path_float)
-    # ds = DataLoader(dataset, shuffle=True)
 
     for year, day_rad, lat, lon, temp, psal, doxy, nitrate in ds:
 

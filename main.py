@@ -24,17 +24,21 @@ parser.add_argument('--batch_size', type=int, default=12)
 parser.add_argument('--epochs', type=int, default=10**3)
 parser.add_argument('--lr', type=float, default=0.01)
 parser.add_argument('--snaperiod', type=int, default=25)
-parser.add_argument('--dropout_rate', type=float, default=0.25)
+parser.add_argument('--dropout_rate', type=float, default=0.1)
 
 # ===== Parsing arguments
 args = parser.parse_args()
 training_folder = args.training_folder
 flag_toy = 0
 batch_size = args.batch_size
-epochs = 1  # args.epochs
+epochs = args.epochs  # args.epochs
 lr = args.lr
 snaperiod = args.snaperiod
 dp_rate = args.dropout_rate
+
+# ===== Printing information about the run
+print(f"The dataset used is {training_folder}\nWe used a reduced version of the ds? {bool(flag_toy)}\n"
+      f"The total number of epochs that will be performed is {epochs}")
 
 # ===== Creating the correct dataframe according to the training folder
 make_ds(training_folder, flag_complete=1, flag_toy=1)
