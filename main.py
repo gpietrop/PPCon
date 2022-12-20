@@ -24,15 +24,17 @@ parser.add_argument('--batch_size', type=int, default=12)
 parser.add_argument('--epochs', type=int, default=10**3)
 parser.add_argument('--lr', type=float, default=0.01)
 parser.add_argument('--snaperiod', type=int, default=25)
+parser.add_argument('--dropout_rate', type=float, default=0.25)
 
 # ===== Parsing arguments
 args = parser.parse_args()
 training_folder = args.training_folder
 flag_toy = 0
 batch_size = args.batch_size
-epochs = args.epochs
+epochs = 1  # args.epochs
 lr = args.lr
 snaperiod = args.snaperiod
+dp_rate = args.dropout_rate
 
 # ===== Creating the correct dataframe according to the training folder
 make_ds(training_folder, flag_complete=1, flag_toy=1)
@@ -49,7 +51,7 @@ train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size,
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
-save_dir = os.getcwd() + "result-dp/"
+save_dir = os.getcwd() + "/result-dp/"
 if not os.path.exists(save_dir):
     os.mkdir(save_dir)
 save_dir = save_dir + str(date.today())
@@ -57,10 +59,12 @@ if not os.path.exists(save_dir):
     os.mkdir(save_dir)
 
 # ===== Saving models hyperparameters
-save_ds_info(training_folder, flag_toy, batch_size, epochs, lr, save_dir)
+save_ds_info(training_folder=training_folder, flag_toy=flag_toy, batch_size=batch_size, epochs=epochs, lr=lr,
+             dp_rate=dp_rate, save_dir=save_dir)
 
 # ===== train the model
-train_model(train_loader, val_loader, epoch=epochs, lr=lr, snaperiod=snaperiod, save_dir=save_dir, device=device)
+train_model(train_loader, val_loader, epoch=epochs, lr=lr, dp_rate=dp_rate, snaperiod=snaperiod, save_dir=save_dir,
+            device=device)
 
 # ===== plot the results obtained on the validation set
 plot_profiles(DataLoader(val_dataset, batch_size=1, shuffle=True), dir=save_dir, ep=epochs)

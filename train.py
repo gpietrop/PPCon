@@ -12,15 +12,17 @@ from architecture.conv1med2 import Conv1dMed
 from architecture.mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 
-def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, save_dir, verbose=False):
+def train_model(train_loader, val_loader, epoch, lr, dp_rate, snaperiod, device, save_dir, verbose=False):
 
     save_dir = save_dir + "/model/"
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
 
     model_mlp_day = MLPDay()
     model_mlp_year = MLPYear()
     model_mlp_lat = MLPLat()
     model_mlp_lon = MLPLon()
-    model_conv = Conv1dMed()
+    model_conv = Conv1dMed(dp_rate=dp_rate)
 
     # Moving models to GPU when available
     model_mlp_day.to(device)
@@ -36,7 +38,7 @@ def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, save_dir
 
     f, f_test = open(save_dir + "/train_loss.txt", "w+"), open(save_dir + "/test_loss.txt", "w+")
 
-    for ep in range(epoch):
+    for ep in range(epoch+1):
         loss_train = []
         loss_test = []
         # Models in training mode
@@ -100,7 +102,7 @@ def train_model(train_loader, val_loader, epoch, lr, snaperiod, device, save_dir
         f.write(f"[EPOCH]: {ep + 1}, [LOSS]: {avg_train_loss:.5f} \n")
 
         # Saving model and testing
-        if ep % snaperiod == 0:
+        if ep % snaperiod == 0 or ep == epoch:
 
             # Saving models at epoch ep
             torch.save(model_mlp_day.state_dict(), save_dir + "/model_day_" + str(ep) + ".pt")

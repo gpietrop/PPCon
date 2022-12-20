@@ -28,12 +28,13 @@ def make_ds(training_folder, flag_complete=1, flag_toy=1):
     return
 
 
-def save_ds_info(training_folder, flag_toy, batch_size, epochs, lr, save_dir):
-    dict_info = {'train_ds': training_folder,
-                 'is_toy': flag_toy,
-                 'batch_size': batch_size,
-                 'epoch': epochs,
-                 'lr': lr}
+def save_ds_info(training_folder, flag_toy, batch_size, epochs, lr, dp_rate, save_dir):
+    dict_info = {'train_ds': [training_folder],
+                 'is_toy': [flag_toy],
+                 'batch_size': [batch_size],
+                 'epoch': [epochs],
+                 'lr': [lr],
+                 'dp_rate': [dp_rate]}
     pd_ds = pd.DataFrame(dict_info)
     pd_ds.to_csv(save_dir + '/info.csv')
 

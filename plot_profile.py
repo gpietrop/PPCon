@@ -1,3 +1,6 @@
+import os
+
+import pandas as pd
 import torch
 import matplotlib.pyplot as plt
 
@@ -10,6 +13,12 @@ def plot_profiles(ds, dir, ep=100):
 
     dir_model = dir + "/model"
     dir_profile = dir + "/profile"
+    if not os.path.exists(dir_profile):
+        os.mkdir(path=dir_profile)
+
+    dir_info = dir + "/info.csv"
+    info_df = pd.read_csv(dir_info)
+    dp_rate = info_df['dp_rate'].item()
 
     # Path of the saved models
     path_model_day = dir_model + "/model_day_" + str(ep) + ".pt"
@@ -36,7 +45,7 @@ def plot_profiles(ds, dir, ep=100):
     model_lon.load_state_dict(torch.load(path_model_lon))
     model_lon.eval()
 
-    model = Conv1dMed()
+    model = Conv1dMed(dp_rate=dp_rate)
     model.load_state_dict(torch.load(path_model_conv))
     model.eval()
     # """
@@ -68,7 +77,7 @@ def plot_profiles(ds, dir, ep=100):
         plt.plot(output_test[0, 0, :].detach().numpy(), label="generated nitrate")
         plt.plot(nitrate[0, 0, :].detach().numpy(), label="measured nitrate")
         plt.legend()
-        plt.savefig(dir_profile + f"/profile_{year}_{day_rad}_{round(lat, 2)}_{round(lon, 2)}.png")
+        plt.savefig(dir_profile + f"/profile_{year.item()}_{day_rad.item()}_{round(lat.item(), 2)}_{round(lon.item(), 2)}.png")
         # plt.show()
         plt.close()
 
