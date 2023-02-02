@@ -14,7 +14,7 @@ from architecture.conv1med2 import Conv1dMed
 from architecture.mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 
-def train_model(train_loader, val_loader, epoch, lr, dp_rate, snaperiod, device, save_dir, verbose=False):
+def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, snaperiod, device, save_dir, verbose=False):
 
     save_dir = save_dir + "/model/"
     if not os.path.exists(save_dir):
@@ -92,7 +92,9 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, snaperiod, device,
 
             output = model_conv(training_x.float())
 
-            loss_conv = mse_loss(training_nitrate, output)  # MSE
+            l2_norm = sum(p.pow(2.0).sum() for p in model_conv.parameters())
+
+            loss_conv = mse_loss(training_nitrate, output) + lambda_l2_reg * l2_norm  # MSE
             loss_train.append(loss_conv.item())
 
             if verbose:

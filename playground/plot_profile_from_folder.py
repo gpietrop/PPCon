@@ -11,8 +11,8 @@ from dataset import FloatDataset
 
 # Where to search the model
 dir = "results/"
-date = "2023-02-02_/"
-ep = 700
+date = "2023-02-02__/"
+ep = 10
 
 # Upload the input ds
 path_float = "/home/gpietropolli/Desktop/canyon-float/ds/float_ds_sf.csv"
