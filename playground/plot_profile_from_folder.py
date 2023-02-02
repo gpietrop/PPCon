@@ -11,7 +11,7 @@ from dataset import FloatDataset
 
 # Where to search the model
 dir = "result-dp/"
-date = "2022-12-20/"
+date = "2022-12-19/"
 ep = 525
 
 # Upload the input ds

@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--training_folder', type=str, default="SUPERFLOAT", choices=["SUPERFLOAT", "CORIOLIS"])
 parser.add_argument('--flag_toy', type=bool, default=False)
 parser.add_argument('--batch_size', type=int, default=12)
-parser.add_argument('--epochs', type=int, default=10**3)
+parser.add_argument('--epochs', type=int, default=10**2)
 parser.add_argument('--lr', type=float, default=0.01)
 parser.add_argument('--snaperiod', type=int, default=25)
 parser.add_argument('--dropout_rate', type=float, default=0.1)
@@ -55,7 +55,7 @@ train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size,
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
-save_dir = os.getcwd() + "/result-dp/"
+save_dir = os.getcwd() + "/results/"
 if not os.path.exists(save_dir):
     os.mkdir(save_dir)
 save_dir = save_dir + str(date.today())

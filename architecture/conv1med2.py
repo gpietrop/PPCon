@@ -50,7 +50,7 @@ class Conv1dMed(nn.Module):
         self.do16 = nn.Dropout(p=self.dp_rate)
 
         self.conv17 = nn.Conv1d(32, out_channels, kernel_size=3, stride=1, padding=1)
-        self.af17 = nn.SELU()
+        self.af17 = nn.ReLU()
 
     def forward(self, x):
         x = self.bn1(self.af1(self.conv1(x)))
