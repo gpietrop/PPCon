@@ -3,6 +3,8 @@ import os
 import numpy as np
 from IPython import display
 
+from pytorchtools import EarlyStopping
+
 import torch
 from torch.optim import Adadelta
 from torch.nn.functional import mse_loss
@@ -37,6 +39,10 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, snaperiod, device,
     optimizer = Adadelta(params=params, lr=lr)
 
     f, f_test = open(save_dir + "/train_loss.txt", "w+"), open(save_dir + "/test_loss.txt", "w+")
+
+    # initialize the early_stopping object
+    path_checkpoint = save_dir + 'checkpoint.pt'
+    early_stopping = EarlyStopping(patience=5, verbose=True, path=path_checkpoint, )
 
     for ep in range(epoch+1):
         loss_train = []
@@ -100,6 +106,14 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, snaperiod, device,
         avg_train_loss = np.average(loss_train)
         print(f"[==== EPOCH]: {ep + 1}, [AVERAGE LOSS]: {avg_train_loss:.5f}")
         f.write(f"[EPOCH]: {ep + 1}, [LOSS]: {avg_train_loss:.5f} \n")
+
+        # early_stopping needs the training loss to check if it has decreased,
+        # and if it has, it will make a checkpoint of the current model
+        early_stopping(avg_train_loss, model_conv)
+        # stop if validation loss doesn't improve after a given patience
+        if early_stopping.early_stop:
+            print("Early stopping")
+            break
 
         # Saving model and testing
         if ep % snaperiod == 0 or ep == epoch:

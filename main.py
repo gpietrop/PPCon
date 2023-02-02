@@ -59,8 +59,12 @@ save_dir = os.getcwd() + "/results/"
 if not os.path.exists(save_dir):
     os.mkdir(save_dir)
 save_dir = save_dir + str(date.today())
+while os.path.exists(save_dir):
+    save_dir = save_dir + "_"
 if not os.path.exists(save_dir):
     os.mkdir(save_dir)
+
+print(f"saving results in {save_dir}")
 
 # ===== Saving models hyperparameters
 save_ds_info(training_folder=training_folder, flag_toy=flag_toy, batch_size=batch_size, epochs=epochs, lr=lr,

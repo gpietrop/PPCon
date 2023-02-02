@@ -10,9 +10,9 @@ from architecture.mlp import MLPDay, MLPYear, MLPLon, MLPLat
 from dataset import FloatDataset
 
 # Where to search the model
-dir = "result-dp/"
-date = "2022-12-19/"
-ep = 525
+dir = "results/"
+date = "2023-02-02_/"
+ep = 700
 
 # Upload the input ds
 path_float = "/home/gpietropolli/Desktop/canyon-float/ds/float_ds_sf.csv"
@@ -35,23 +35,28 @@ path_model_conv = dir_model + "/model_conv_" + str(ep) + ".pt"
 
 # Upload and evaluate all the models necessary
 model_day = MLPDay()
-model_day.load_state_dict(torch.load(path_model_day))
+model_day.load_state_dict(torch.load(path_model_day,
+                                     map_location=torch.device('cpu')))
 model_day.eval()
 
 model_year = MLPYear()
-model_year.load_state_dict(torch.load(path_model_year))
+model_year.load_state_dict(torch.load(path_model_year,
+                                      map_location=torch.device('cpu')))
 model_year.eval()
 
 model_lat = MLPLat()
-model_lat.load_state_dict(torch.load(path_model_lat))
+model_lat.load_state_dict(torch.load(path_model_lat,
+                                     map_location=torch.device('cpu')))
 model_lat.eval()
 
 model_lon = MLPLon()
-model_lon.load_state_dict(torch.load(path_model_lon))
+model_lon.load_state_dict(torch.load(path_model_lon,
+                                     map_location=torch.device('cpu')))
 model_lon.eval()
 
 model = Conv1dMed(dp_rate=dp_rate)
-model.load_state_dict(torch.load(path_model_conv))
+model.load_state_dict(torch.load(path_model_conv,
+                                 map_location=torch.device('cpu')))
 model.eval()
 
 for year, day_rad, lat, lon, temp, psal, doxy, nitrate in ds:
