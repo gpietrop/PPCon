@@ -17,7 +17,7 @@ from utils import make_ds, save_ds_info
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 print(f"We will use {device}")
 
-random.seed(seed=123)
+random.seed(123)
 
 # ===== Create the parser
 parser = argparse.ArgumentParser()

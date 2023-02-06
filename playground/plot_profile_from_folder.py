@@ -5,14 +5,14 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 
 # from conv1med import Conv1dMed
-from architecture.conv1med2 import Conv1dMed
+from architecture.conv1med_dp import Conv1dMed
 from architecture.mlp import MLPDay, MLPYear, MLPLon, MLPLat
 from dataset import FloatDataset
 
 # Where to search the model
 dir = "results/"
-date = "2023-02-02__/"
-ep = 10
+date = "2023-02-02_______/"
+ep = 20
 
 # Upload the input ds
 path_float = "/home/gpietropolli/Desktop/canyon-float/ds/float_ds_sf.csv"

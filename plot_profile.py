@@ -5,7 +5,7 @@ import torch
 import matplotlib.pyplot as plt
 
 # from conv1med import Conv1dMed
-from architecture.conv1med2 import Conv1dMed
+from architecture.conv1med_dp import Conv1dMed
 from architecture.mlp import MLPDay, MLPYear, MLPLon, MLPLat
 
 

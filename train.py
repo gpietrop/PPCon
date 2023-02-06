@@ -10,7 +10,7 @@ from torch.optim import Adadelta
 from torch.nn.functional import mse_loss
 
 # from conv1med import Conv1dMed
-from architecture.conv1med2 import Conv1dMed
+from architecture.conv1med_dp import Conv1dMed
 from architecture.mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 
@@ -111,11 +111,11 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, sna
 
         # early_stopping needs the training loss to check if it has decreased,
         # and if it has, it will make a checkpoint of the current model
-        early_stopping(avg_train_loss, model_conv)
+        # early_stopping(avg_train_loss, model_conv)
         # stop if validation loss doesn't improve after a given patience
-        if early_stopping.early_stop:
-            print("Early stopping")
-            break
+        # if early_stopping.early_stop:
+        #    print("Early stopping")
+        #    break
 
         # Saving model and testing
         if ep % snaperiod == 0 or ep == epoch:
@@ -173,7 +173,9 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, sna
 
                     output_test = model_conv(testing_x.float())
 
-                    loss_conv = mse_loss(testing_nitrate, output_test)
+                    l2_norm = sum(p.pow(2.0).sum() for p in model_conv.parameters())
+                    loss_conv = mse_loss(testing_nitrate, output_test) + lambda_l2_reg * l2_norm  # MSE
+
                     loss_test.append(loss_conv)
 
                     if verbose:
