@@ -23,6 +23,7 @@ random.seed(123)
 parser = argparse.ArgumentParser()
 parser.add_argument('--training_folder', type=str, default="SUPERFLOAT", choices=["SUPERFLOAT", "CORIOLIS"])
 parser.add_argument('--flag_toy', type=bool, default=False)
+parser.add_argument('--variable', type=str, default="CHLA", choices=["NITRATE", "CHLA"])
 parser.add_argument('--batch_size', type=int, default=32)
 parser.add_argument('--epochs', type=int, default=10**2)
 parser.add_argument('--lr', type=float, default=0.1)
@@ -34,7 +35,8 @@ parser.add_argument('--alpha_smooth_reg', type=float, default=0.01)
 # ===== Parsing arguments
 args = parser.parse_args()
 training_folder = args.training_folder
-flag_toy = 0
+variable = args.variable
+flag_toy = args.flag_toy
 
 batch_size = args.batch_size
 epochs = args.epochs  # args.epochs
@@ -47,13 +49,14 @@ alpha_smooth_reg = args.alpha_smooth_reg
 
 # ===== Printing information about the run
 print(f"The dataset used is {training_folder}\nWe used a reduced version of the ds? {bool(flag_toy)}\n"
+      f"The variable predicted is {variable}\n"
       f"The total number of epochs that will be performed is {epochs}")
 
-# ===== Creating the correct dataframe according to the training folder
-make_ds(training_folder, flag_complete=1, flag_toy=1)
+# ===== Creating the correct dataframe according to the training folder (if it does not exists yet!)
+make_ds(training_folder, variable=variable, flag_complete=1, flag_toy=1)
 
 if training_folder == "SUPERFLOAT":
-    path_ds = os.getcwd() + "/ds/toy_ds_sf.csv" if flag_toy else os.getcwd() + "/ds/float_ds_sf.csv"
+    path_ds = os.getcwd() + f"/ds/{variable}/toy_ds_sf.csv" if flag_toy else os.getcwd() + f"/ds/{variable}/float_ds_sf.csv"
 dataset = FloatDataset(path_ds)
 
 train_frac = 0.8

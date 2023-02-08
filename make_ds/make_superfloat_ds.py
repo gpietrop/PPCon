@@ -45,7 +45,7 @@ def read_date_time(date_time):
     return year, day_rad
 
 
-def make_dict_single_float(path, date_time):
+def make_dict_single_float(path, date_time, variable):
     if not os.path.exists(path):
         return None
 
@@ -71,24 +71,24 @@ def make_dict_single_float(path, date_time):
     doxy_df = ds["DOXY"][:].data[:]
     pres_doxy_df = ds["PRES_DOXY"][:].data[:]
 
-    if "NITRATE" not in ds.variables.keys():
+    if variable not in ds.variables.keys():
         return dict()
-    nitrate_df = ds["NITRATE"][:].data[:]
-    pres_nitrate_df = ds["PRES_NITRATE"][:].data[:]
+    variable_df = ds[f"{variable}"][:].data[:]
+    pres_variable_df = ds[f"PRES_{variable}"][:].data[:]
 
     temp = discretize(pres_temp_df, temp_df)
     psal = discretize(pres_psal_df, psal_df)
     doxy = discretize(pres_doxy_df, doxy_df)
 
-    nitrate = discretize(pres_nitrate_df, nitrate_df)
+    variable = discretize(pres_variable_df, variable_df)
     name_float = path[8:-3]
-    if temp is None or psal is None or doxy is None or nitrate is None:
+    if temp is None or psal is None or doxy is None or variable is None:
         return dict()
-    dict_float = {name_float: [year, day_rad, lat, lon, temp, psal, doxy, nitrate]}
+    dict_float = {name_float: [year, day_rad, lat, lon, temp, psal, doxy, variable]}
     return dict_float
 
 
-def make_dataset(path_float_index):
+def make_dataset(path_float_index, variable):
     name_list = pd.read_csv(path_float_index, header=None).to_numpy()[:, 0].tolist()
     datetime_list = pd.read_csv(path_float_index, header=None).to_numpy()[:, 3].tolist()
 
@@ -99,21 +99,21 @@ def make_dataset(path_float_index):
         if not os.path.exists(path):
             continue
         date_time = datetime_list[i]
-        dict_single_float = make_dict_single_float(path, date_time)
+        dict_single_float = make_dict_single_float(path, date_time, variable)
         dict_ds = {**dict_ds, **dict_single_float}
 
     return dict_ds
 
 
-def make_pandas_df(path_float_index):
-    dict_ds = make_dataset(path_float_index)
-    pd_ds = pd.DataFrame(dict_ds, index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', 'nitrate'])
+def make_pandas_df(path_float_index, variable):
+    dict_ds = make_dataset(path_float_index, variable)
+    pd_ds = pd.DataFrame(dict_ds, index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', variable])
 
-    pd_ds.to_csv(os.getcwd() + '/ds/float_ds_sf.csv')
+    pd_ds.to_csv(os.getcwd() + f'/ds/{variable}/float_ds_sf.csv')
     return
 
 
-def make_toy_dataset(path_float_index):
+def make_toy_dataset(path_float_index, variable):
     name_list = pd.read_csv(path_float_index, header=None).to_numpy()[:, 0].tolist()
     datetime_list = pd.read_csv(path_float_index, header=None).to_numpy()[:, 3].tolist()
 
@@ -124,15 +124,15 @@ def make_toy_dataset(path_float_index):
         if not os.path.exists(path):
             continue
         date_time = datetime_list[i]
-        dict_single_float = make_dict_single_float(path, date_time)
+        dict_single_float = make_dict_single_float(path, date_time, variable)
         dict_ds = {**dict_ds, **dict_single_float}
 
     return dict_ds
 
 
-def make_pandas_toy_df(path_float_index):
-    dict_ds = make_toy_dataset(path_float_index)
-    pd_ds = pd.DataFrame(dict_ds, index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', 'nitrate'])
+def make_pandas_toy_df(path_float_index, variable):
+    dict_ds = make_toy_dataset(path_float_index, variable)
+    pd_ds = pd.DataFrame(dict_ds, index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', variable])
 
-    pd_ds.to_csv(os.getcwd() + '/ds/toy_ds_sf.csv')
+    pd_ds.to_csv(os.getcwd() + f'/ds/{variable}/toy_ds_sf.csv')
     return
