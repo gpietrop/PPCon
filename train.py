@@ -14,8 +14,8 @@ from architecture.conv1med_dp import Conv1dMed
 from architecture.mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 
-def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, snaperiod, device, save_dir, verbose=False):
-
+def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alpha_smooth_reg, snaperiod, device,
+                save_dir, verbose=False):
     save_dir = save_dir + "/model/"
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
@@ -44,7 +44,7 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, sna
     path_checkpoint = save_dir + 'checkpoint.pt'
     early_stopping = EarlyStopping(patience=5, verbose=True, path=path_checkpoint, )
 
-    for ep in range(epoch+1):
+    for ep in range(epoch + 1):
         loss_train = []
         loss_test = []
         # Models in training mode
@@ -92,9 +92,19 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, sna
 
             output = model_conv(training_x.float())
 
-            l2_norm = sum(p.pow(2.0).sum() for p in model_conv.parameters())
+            mse = mse_loss(training_nitrate, output)
 
-            loss_conv = mse_loss(training_nitrate, output) + lambda_l2_reg * l2_norm  # MSE
+            l2_norm = sum(p.pow(2.0).sum() for p in model_conv.parameters())
+            l2_reg = lambda_l2_reg * l2_norm
+
+            smoothness = 0
+            for index in range(output.shape[0]):
+                batch_tens = output[index, 0, :]
+                batch_tens_smoothness = sum(torch.abs(batch_tens[i] - batch_tens[i - 1]) for i in range(1, batch_tens.shape[0]))
+                smoothness += batch_tens_smoothness
+            smoothness = alpha_smooth_reg * smoothness
+
+            loss_conv = mse + l2_reg + smoothness
             loss_train.append(loss_conv.item())
 
             if verbose:
@@ -173,8 +183,19 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, sna
 
                     output_test = model_conv(testing_x.float())
 
+                    mse = mse_loss(testing_nitrate, output_test)
+
                     l2_norm = sum(p.pow(2.0).sum() for p in model_conv.parameters())
-                    loss_conv = mse_loss(testing_nitrate, output_test) + lambda_l2_reg * l2_norm  # MSE
+                    l2_reg = lambda_l2_reg * l2_norm
+
+                    smoothness = 0
+                    for index in range(output_test.shape[0]):
+                        batch_tens = output_test[index, 0, :]
+                        batch_tens_smoothness = sum(batch_tens[i] - batch_tens[i-1] for i in range(1, batch_tens.shape[0]))
+                        smoothness += batch_tens_smoothness
+                    smoothness = alpha_smooth_reg * smoothness
+
+                    loss_conv = mse + l2_reg + smoothness
 
                     loss_test.append(loss_conv)
 
