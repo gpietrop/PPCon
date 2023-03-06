@@ -1,7 +1,9 @@
 import os
 
+import numpy as np
 import pandas as pd
 import torch
+
 import matplotlib.pyplot as plt
 
 # from conv1med import Conv1dMed
@@ -68,8 +70,13 @@ def plot_profiles(ds, dir, ep=100):
         x = torch.cat((output_day, output_year, output_lat, output_lon, temp, psal, doxy), 1)
         output_test = model(x.float())
 
-        plt.plot(output_test[0, 0, :].detach().numpy(), label="generated nitrate")
-        plt.plot(nitrate[0, 0, :].detach().numpy(), label="measured nitrate")
+        depth_output = np.linspace(0, 2000, len(output_test[0, 0, :].detach().numpy()))
+        depth_variable = np.linspace(0, 2000, len(nitrate[0, 0, :].detach().numpy()))
+
+        plt.plot(output_test[0, 0, :].detach().numpy(), depth_output, label="generated nitrate")
+        plt.plot(nitrate[0, 0, :].detach().numpy(), depth_variable, label="measured nitrate")
+        plt.gca().invert_yaxis()
+
         plt.legend()
         plt.savefig(dir_profile + f"/profile_{year.item()}_{day_rad.item()}_{round(lat.item(), 2)}_{round(lon.item(), 2)}.png")
         # plt.show()
