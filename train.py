@@ -15,8 +15,8 @@ from architecture.mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 
 def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alpha_smooth_reg, snaperiod, device,
-                save_dir, verbose=False):
-    save_dir = save_dir + "/model/"
+                dir, verbose=False):
+    save_dir = dir + "/model/"
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
 
@@ -38,7 +38,8 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alp
         model_mlp_lon.parameters()) + list(model_conv.parameters())
     optimizer = Adadelta(params=params, lr=lr)
 
-    f, f_test = open(save_dir + "/train_loss.txt", "w+"), open(save_dir + "/test_loss.txt", "w+")
+    f, f_test = open(dir + "/train_loss.txt", "w+"), open(dir + "/test_loss.txt", "w+")
+    f_mse_train, f_mse_test = open(dir + "/mse_train_loss.txt", "w+"), open(dir + "/mse_test_loss.txt", "w+")
 
     # initialize the early_stopping object
     path_checkpoint = save_dir + 'checkpoint.pt'
@@ -47,6 +48,8 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alp
     for ep in range(epoch + 1):
         loss_train = []
         loss_test = []
+        mse_train = []
+        mse_test = []
         # Models in training mode
         model_mlp_day.train()
         model_mlp_year.train()
@@ -105,7 +108,9 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alp
             smoothness = alpha_smooth_reg * smoothness
 
             loss_conv = mse + l2_reg + smoothness
+
             loss_train.append(loss_conv.item())
+            mse_train.append(mse.item())
 
             if verbose:
                 print(f"[EPOCH]: {ep + 1}, [LOSS]: {loss_conv.item():.12f}")
@@ -116,8 +121,11 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alp
             optimizer.step()
 
         avg_train_loss = np.average(loss_train)
+        avg_train_mse = np.average(mse_train)
+
         print(f"[==== EPOCH]: {ep + 1}, [AVERAGE LOSS]: {avg_train_loss:.5f}")
         f.write(f"[EPOCH]: {ep + 1}, [LOSS]: {avg_train_loss:.5f} \n")
+        f_mse_train.write(f"[EPOCH]: {ep + 1}, [LOSS]: {avg_train_mse:.4f} \n")
 
         # early_stopping needs the training loss to check if it has decreased,
         # and if it has, it will make a checkpoint of the current model
@@ -198,14 +206,20 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alp
                     loss_conv = mse + l2_reg + smoothness
 
                     loss_test.append(loss_conv)
+                    mse_test.append(mse)
 
                     if verbose:
                         print(f"-----[EPOCH]: {ep + 1}, [TEST LOSS]: {loss_conv.item():.12f}")
                         display.clear_output(wait=True)
 
             avg_test_loss = np.average([loss_.cpu() for loss_ in loss_test])
+            avg_test_mse = np.average([loss_.cpu() for loss_ in mse_test])
+
             print(f"[==== EPOCH]: {ep + 1}, [AVERAGE TEST LOSS]: {avg_test_loss:.5f}")
             f_test.write(f"[EPOCH]: {ep + 1}, [TEST LOSS]: {avg_test_loss:.5f} \n")
+            f_mse_test.write(f"[EPOCH]: {ep + 1}, [TEST LOSS]: {avg_test_mse:.4f} \n")
 
     f.close()
     f_test.close()
+    f_mse_train.close()
+    f_mse_train.close()
