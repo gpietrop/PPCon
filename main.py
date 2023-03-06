@@ -70,6 +70,9 @@ val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 save_dir = os.getcwd() + "/results/"
 if not os.path.exists(save_dir):
     os.mkdir(save_dir)
+save_dir = save_dir + "/" + variable
+if not os.path.exists(save_dir):
+    os.mkdir(save_dir)
 save_dir = save_dir + str(date.today())
 while os.path.exists(save_dir):
     save_dir = save_dir + "_"
