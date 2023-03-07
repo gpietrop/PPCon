@@ -10,8 +10,10 @@ import matplotlib.pyplot as plt
 from architecture.conv1med_dp import Conv1dMed
 from architecture.mlp import MLPDay, MLPYear, MLPLon, MLPLat
 
+from discretization import dict_max_pressure, dict_interval
 
-def plot_profiles(ds, dir, ep=100):
+
+def plot_profiles(ds, dir, variable, ep=100):
 
     dir_model = dir + "/model"
     dir_profile = dir + "/profile"
@@ -21,6 +23,9 @@ def plot_profiles(ds, dir, ep=100):
     dir_info = dir + "/info.csv"
     info_df = pd.read_csv(dir_info)
     dp_rate = info_df['dp_rate'].item()
+
+    max_pres = dict_max_pressure[variable]
+    interval = dict_interval[variable]
 
     # Path of the saved models
     path_model_day = dir_model + "/model_day_" + str(ep) + ".pt"
@@ -70,11 +75,11 @@ def plot_profiles(ds, dir, ep=100):
         x = torch.cat((output_day, output_year, output_lat, output_lon, temp, psal, doxy), 1)
         output_test = model(x.float())
 
-        depth_output = np.linspace(0, 2000, len(output_test[0, 0, :].detach().numpy()))
-        depth_variable = np.linspace(0, 2000, len(nitrate[0, 0, :].detach().numpy()))
+        depth_output = np.linspace(0, max_pres, len(output_test[0, 0, :].detach().numpy()))
+        depth_variable = np.linspace(0, max_pres, len(nitrate[0, 0, :].detach().numpy()))
 
-        plt.plot(output_test[0, 0, :].detach().numpy(), depth_output, label="generated nitrate")
-        plt.plot(nitrate[0, 0, :].detach().numpy(), depth_variable, label="measured nitrate")
+        plt.plot(output_test[0, 0, :].detach().numpy(), depth_output, label=f"generated {variable}")
+        plt.plot(nitrate[0, 0, :].detach().numpy(), depth_variable, label=f"measured {variable}")
         plt.gca().invert_yaxis()
 
         plt.legend()

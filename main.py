@@ -25,8 +25,8 @@ parser.add_argument('--training_folder', type=str, default="SUPERFLOAT", choices
 parser.add_argument('--flag_toy', type=bool, default=False)
 parser.add_argument('--variable', type=str, default="NITRATE", choices=["NITRATE", "CHLA"])
 parser.add_argument('--batch_size', type=int, default=32)
-parser.add_argument('--epochs', type=int, default=1)
-parser.add_argument('--lr', type=float, default=0.1)
+parser.add_argument('--epochs', type=int, default=100)
+parser.add_argument('--lr', type=float, default=1)
 parser.add_argument('--snaperiod', type=int, default=25)
 parser.add_argument('--dropout_rate', type=float, default=0.1)
 parser.add_argument('--lambda_l2_reg', type=float, default=0.01)
@@ -90,4 +90,4 @@ train_model(train_loader, val_loader, epoch=epochs, lr=lr, dp_rate=dp_rate, lamb
             alpha_smooth_reg=alpha_smooth_reg, snaperiod=snaperiod, dir=save_dir, device=device)
 
 # ===== plot the results obtained on the validation set
-plot_profiles(DataLoader(val_dataset, batch_size=1, shuffle=True), dir=save_dir, ep=epochs)
+plot_profiles(DataLoader(val_dataset, batch_size=1, shuffle=True), variable=variable, dir=save_dir, ep=epochs)

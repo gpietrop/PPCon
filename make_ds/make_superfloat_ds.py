@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import netCDF4 as nc
 
+from discretization import dict_max_pressure, dict_interval
+
 
 def find_nearest(array, value):
     array = np.asarray(array)
@@ -12,7 +14,7 @@ def find_nearest(array, value):
     return idx
 
 
-def discretize(pres, var, max_pres=2000, interval=10):
+def discretize(pres, var, max_pres, interval):
     """
     function that take as input a profile, the corresponding pres and create a tensor
     the interval input represents the discretization scale
@@ -76,11 +78,14 @@ def make_dict_single_float(path, date_time, variable):
     variable_df = ds[f"{variable}"][:].data[:]
     pres_variable_df = ds[f"PRES_{variable}"][:].data[:]
 
-    temp = discretize(pres_temp_df, temp_df)
-    psal = discretize(pres_psal_df, psal_df)
-    doxy = discretize(pres_doxy_df, doxy_df)
+    max_pres = dict_max_pressure[variable]
+    interval = dict_interval[variable]
 
-    variable = discretize(pres_variable_df, variable_df)
+    temp = discretize(pres_temp_df, temp_df, max_pres, interval)
+    psal = discretize(pres_psal_df, psal_df, max_pres, interval)
+    doxy = discretize(pres_doxy_df, doxy_df, max_pres, interval)
+
+    variable = discretize(pres_variable_df, variable_df, max_pres, interval)
     name_float = path[8:-3]
     if temp is None or psal is None or doxy is None or variable is None:
         return dict()
