@@ -10,19 +10,20 @@ from architecture.mlp import MLPDay, MLPYear, MLPLon, MLPLat
 from dataset import FloatDataset
 
 # Where to search the model
-dir = "results/"
-date = "2023-02-02_______/"
-ep = 20
+dir = "results"
+var = "CHLA"
+date = "2023-03-07"
+ep = 10
 
 # Upload the input ds
-path_float = "/home/gpietropolli/Desktop/canyon-float/ds/float_ds_sf.csv"
+path_float = f"/home/gpietropolli/Desktop/canyon-float/ds/{var}/float_ds_sf.csv"
 dataset = FloatDataset(path_float)
 ds = DataLoader(dataset, shuffle=True)
 
-dir_model = "/home/gpietropolli/Desktop/canyon-float/" + dir + date + "model"
+dir_model = f"/home/gpietropolli/Desktop/canyon-float/{dir}/{var}/{date}/model"
 # dir_profile = dir + "/profile"
 
-dir_info = "/home/gpietropolli/Desktop/canyon-float/" + dir + date + "info.csv"
+dir_info = f"/home/gpietropolli/Desktop/canyon-float/{dir}/{var}/{date}/info.csv"
 info_df = pd.read_csv(dir_info)
 dp_rate = info_df['dp_rate'].item()
 
