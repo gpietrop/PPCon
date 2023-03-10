@@ -25,7 +25,7 @@ parser.add_argument('--training_folder', type=str, default="SUPERFLOAT", choices
 parser.add_argument('--flag_toy', type=bool, default=False)
 parser.add_argument('--variable', type=str, default="BBP700", choices=["NITRATE", "CHLA", "BBP700"])
 parser.add_argument('--batch_size', type=int, default=32)
-parser.add_argument('--epochs', type=int, default=1)
+parser.add_argument('--epochs', type=int, default=100)
 parser.add_argument('--lr', type=float, default=1)
 parser.add_argument('--snaperiod', type=int, default=25)
 parser.add_argument('--dropout_rate', type=float, default=0.1)
