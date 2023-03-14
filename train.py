@@ -14,8 +14,9 @@ from architecture.conv1med_dp import Conv1dMed
 from architecture.mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 
-def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alpha_smooth_reg, snaperiod, device,
-                dir, verbose=False):
+def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alpha_smooth_reg, attention_max, snaperiod,
+                device, dir, verbose=False):
+
     save_dir = dir + "/model/"
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
@@ -57,7 +58,7 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alp
         model_mlp_lon.train()
         model_conv.train()
 
-        for training_year, training_day, training_lat, training_lon, training_temp, training_psal, training_doxy, training_nitrate in train_loader:
+        for training_year, training_day, training_lat, training_lon, training_temp, training_psal, training_doxy, training_output in train_loader:
 
             # Moving tensors to GPU when available
             training_year = training_year.to(device)
@@ -67,7 +68,7 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alp
             training_temp = training_temp.to(device)
             training_psal = training_psal.to(device)
             training_doxy = training_doxy.to(device)
-            training_nitrate = training_nitrate.to(device)
+            training_output = training_output.to(device)
 
             training_day = training_day.unsqueeze(1)
             output_day = model_mlp_day(training_day)
@@ -88,14 +89,19 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alp
             training_temp = torch.transpose(training_temp.unsqueeze(0), 0, 1)
             training_psal = torch.transpose(training_psal.unsqueeze(0), 0, 1)
             training_doxy = torch.transpose(training_doxy.unsqueeze(0), 0, 1)
-            training_nitrate = torch.transpose(training_nitrate.unsqueeze(0), 0, 1)
+            training_output = torch.transpose(training_output.unsqueeze(0), 0, 1)
 
             training_x = torch.cat(
                 (output_day, output_year, output_lat, output_lon, training_temp, training_psal, training_doxy), 1)
 
             output = model_conv(training_x.float())
 
-            mse = mse_loss(training_nitrate, output)
+            mse = mse_loss(training_output, output)
+
+            # adding loss attention to the maximum of the peak
+            max_training_output = torch.max(training_output)
+            max_output = torch.max(output)
+            peak_difference = attention_max * torch.abs(max_training_output - max_output)
 
             l2_norm = sum(p.pow(2.0).sum() for p in model_conv.parameters())
             l2_reg = lambda_l2_reg * l2_norm
@@ -107,7 +113,7 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alp
                 smoothness += batch_tens_smoothness
             smoothness = alpha_smooth_reg * smoothness
 
-            loss_conv = mse + l2_reg + smoothness
+            loss_conv = mse + l2_reg + smoothness + peak_difference
 
             loss_train.append(loss_conv.item())
             mse_train.append(mse.item())
@@ -153,7 +159,7 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alp
             model_conv.eval()
 
             with torch.no_grad():
-                for testing_year, testing_day, testing_lat, testing_lon, testing_temp, testing_psal, testing_doxy, testing_nitrate in val_loader:
+                for testing_year, testing_day, testing_lat, testing_lon, testing_temp, testing_psal, testing_doxy, testing_output in val_loader:
 
                     # Moving tensors to GPU when available
                     testing_year = testing_year.to(device)
@@ -163,7 +169,7 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alp
                     testing_temp = testing_temp.to(device)
                     testing_psal = testing_psal.to(device)
                     testing_doxy = testing_doxy.to(device)
-                    testing_nitrate = testing_nitrate.to(device)
+                    testing_output = testing_output.to(device)
 
                     testing_day = testing_day.unsqueeze(1)
                     output_day_test = model_mlp_day(testing_day)
@@ -184,14 +190,14 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alp
                     testing_temp = torch.transpose(testing_temp.unsqueeze(0), 0, 1)
                     testing_psal = torch.transpose(testing_psal.unsqueeze(0), 0, 1)
                     testing_doxy = torch.transpose(testing_doxy.unsqueeze(0), 0, 1)
-                    testing_nitrate = torch.transpose(testing_nitrate.unsqueeze(0), 0, 1)
+                    testing_output = torch.transpose(testing_output.unsqueeze(0), 0, 1)
 
                     testing_x = torch.cat((output_day_test, output_year_test, output_lat_test, output_lon_test,
                                            testing_temp, testing_psal, testing_doxy), 1)
 
                     output_test = model_conv(testing_x.float())
 
-                    mse = mse_loss(testing_nitrate, output_test)
+                    mse = mse_loss(testing_output, output_test)
 
                     l2_norm = sum(p.pow(2.0).sum() for p in model_conv.parameters())
                     l2_reg = lambda_l2_reg * l2_norm

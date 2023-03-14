@@ -12,11 +12,11 @@ from dataset import FloatDataset
 # Where to search the model
 dir = "results"
 var = "CHLA"
-date = "2023-03-07"
-ep = 10
+date = "2023-03-10"
+ep = 200
 
 # Upload the input ds
-path_float = f"/home/gpietropolli/Desktop/canyon-float/ds/{var}/float_ds_sf.csv"
+path_float = f"/home/gpietropolli/Desktop/canyon-float/ds/NITRATE/float_ds_sf.csv"
 dataset = FloatDataset(path_float)
 ds = DataLoader(dataset, shuffle=True)
 
@@ -60,7 +60,7 @@ model.load_state_dict(torch.load(path_model_conv,
                                  map_location=torch.device('cpu')))
 model.eval()
 
-for year, day_rad, lat, lon, temp, psal, doxy, nitrate in ds:
+for year, day_rad, lat, lon, temp, psal, doxy, output in ds:
     output_day = model_day(day_rad.unsqueeze(1))
     output_year = model_year(year.unsqueeze(1))
     output_lat = model_lat(lat.unsqueeze(1))
@@ -73,13 +73,13 @@ for year, day_rad, lat, lon, temp, psal, doxy, nitrate in ds:
     temp = torch.transpose(temp.unsqueeze(0), 0, 1)
     psal = torch.transpose(psal.unsqueeze(0), 0, 1)
     doxy = torch.transpose(doxy.unsqueeze(0), 0, 1)
-    nitrate = torch.transpose(nitrate.unsqueeze(0), 0, 1)
+    output = torch.transpose(output.unsqueeze(0), 0, 1)
 
     x = torch.cat((output_day, output_year, output_lat, output_lon, temp, psal, doxy), 1)
     output_test = model(x.float())
 
-    plt.plot(output_test[0, 0, :].detach().numpy(), label="generated nitrate")
-    plt.plot(nitrate[0, 0, :].detach().numpy(), label="measured nitrate")
+    plt.plot(output_test[0, 0, :].detach().numpy(), label="generated")
+    # plt.plot(output[0, 0, :].detach().numpy(), label="measured")
     plt.legend()
     # plt.savefig(dir_profile + f"/profile_{year}_{day_rad}_{round(lat, 2)}_{round(lon, 2)}.png")
     plt.show()

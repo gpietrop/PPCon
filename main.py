@@ -31,6 +31,7 @@ parser.add_argument('--snaperiod', type=int, default=25)
 parser.add_argument('--dropout_rate', type=float, default=0.1)
 parser.add_argument('--lambda_l2_reg', type=float, default=0.01)
 parser.add_argument('--alpha_smooth_reg', type=float, default=0.01)
+parser.add_argument('--attention_max', type=float, default=0)
 
 # ===== Parsing arguments
 args = parser.parse_args()
@@ -46,6 +47,7 @@ snaperiod = args.snaperiod
 dp_rate = args.dropout_rate
 lambda_l2_reg = args.lambda_l2_reg
 alpha_smooth_reg = args.alpha_smooth_reg
+attention_max = args.attention_max
 
 # ===== Printing information about the run
 print(f"The dataset used is {training_folder}\nWe used a reduced version of the ds? {bool(flag_toy)}\n"
@@ -87,7 +89,8 @@ save_ds_info(training_folder=training_folder, flag_toy=flag_toy, batch_size=batc
 
 # ===== train the model
 train_model(train_loader, val_loader, epoch=epochs, lr=lr, dp_rate=dp_rate, lambda_l2_reg=lambda_l2_reg,
-            alpha_smooth_reg=alpha_smooth_reg, snaperiod=snaperiod, dir=save_dir, device=device)
+            alpha_smooth_reg=alpha_smooth_reg, attention_max=attention_max, snaperiod=snaperiod, dir=save_dir,
+            device=device)
 
 # ===== plot the results obtained on the validation set
 plot_profiles(DataLoader(val_dataset, batch_size=1, shuffle=True), variable=variable, dir=save_dir, ep=epochs)
