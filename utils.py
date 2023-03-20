@@ -6,6 +6,10 @@ import pandas as pd
 def make_ds(training_folder, variable, flag_complete=1, flag_toy=1):
     if training_folder == "SUPERFLOAT":
         from make_ds.make_superfloat_ds import make_pandas_df, make_pandas_toy_df
+
+        if not os.path.exists(os.getcwd() + f"/ds/{variable}/"):
+            os.mkdir(os.getcwd() + f"/ds/{variable}/")
+
         if flag_complete and not os.path.exists(os.getcwd() + f"/ds/{variable}/float_ds_sf.csv"):
             print("making ds...")
             make_pandas_df(os.getcwd() + '/ds/SUPERFLOAT/Float_Index.txt', variable=variable)

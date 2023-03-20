@@ -56,7 +56,7 @@ def plot_profiles(ds, dir, variable, ep=100):
     model.load_state_dict(torch.load(path_model_conv))
     model.eval()
 
-    for year, day_rad, lat, lon, temp, psal, doxy, nitrate in ds:
+    for year, day_rad, lat, lon, temp, psal, doxy, output_variable in ds:
 
         output_day = model_day(day_rad.unsqueeze(1))
         output_year = model_year(year.unsqueeze(1))
@@ -70,16 +70,20 @@ def plot_profiles(ds, dir, variable, ep=100):
         temp = torch.transpose(temp.unsqueeze(0), 0, 1)
         psal = torch.transpose(psal.unsqueeze(0), 0, 1)
         doxy = torch.transpose(doxy.unsqueeze(0), 0, 1)
-        nitrate = torch.transpose(nitrate.unsqueeze(0), 0, 1)
+        output_variable = torch.transpose(output_variable.unsqueeze(0), 0, 1)
 
         x = torch.cat((output_day, output_year, output_lat, output_lon, temp, psal, doxy), 1)
         output_test = model(x.float())
 
         depth_output = np.linspace(0, max_pres, len(output_test[0, 0, :].detach().numpy()))
-        depth_variable = np.linspace(0, max_pres, len(nitrate[0, 0, :].detach().numpy()))
+        depth_variable = np.linspace(0, max_pres, len(output_variable[0, 0, :].detach().numpy()))
+
+        if variable == "BBP700":
+            output_variable = output_variable / 1000
+            output_test = output_test / 1000
 
         plt.plot(output_test[0, 0, :].detach().numpy(), depth_output, label=f"generated {variable}")
-        plt.plot(nitrate[0, 0, :].detach().numpy(), depth_variable, label=f"measured {variable}")
+        plt.plot(output_variable[0, 0, :].detach().numpy(), depth_variable, label=f"measured {variable}")
         plt.gca().invert_yaxis()
 
         plt.legend()

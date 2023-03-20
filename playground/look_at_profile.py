@@ -2,6 +2,7 @@ import os
 
 import netCDF4 as nc
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 from make_ds.make_superfloat_ds import discretize
@@ -36,11 +37,14 @@ while flag == 0:
         var_df = ds[var_name][:].data[:]
         pres_var = ds[f"PRES_{var_name}"][:].data[:]
 
+# print(qf)
+qf = qf
 print(qf)
-print(pres_var)
 variable = discretize(pres_var, var_df, max_pres=dict_max_pressure[var_name], interval=dict_interval[var_name])
+variable = variable * 100
 # print("=====")
-print(variable)
-plt.plot(variable)
+# print(variable)
+plt.plot(pres_var, qf)
+plt.plot(range(200), variable)
 plt.show()
 plt.close()

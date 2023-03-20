@@ -78,6 +78,12 @@ def make_dict_single_float(path, date_time, variable):
     variable_df = ds[f"{variable}"][:].data[:]
     pres_variable_df = ds[f"PRES_{variable}"][:].data[:]
 
+    if variable == "CHLA" or variable == "BBP700":
+        if pres_variable_df[0] > 10 or pres_variable_df[-1] < 180:
+            return dict()
+
+    if variable == "BBP700":
+        variable_df = variable_df * 1000
     max_pres = dict_max_pressure[variable]
     interval = dict_interval[variable]
 
