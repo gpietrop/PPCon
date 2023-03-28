@@ -6,7 +6,10 @@ def missing_extreme_test(pres_variable_df, min_extreme=10, max_extreme=180):
     :param max_extreme: maximum value where there must be at least one measurement
     :return: flag 1 if the measurement is accepted, 0 of it need to be removed
     """
-    return
+    if pres_variable_df[0] > min_extreme or pres_variable_df[-1] < max_extreme:
+        return 0
+    else:
+        return 1
 
 
 def counting_measurement_test(variable_df, tradeoff=50):
@@ -16,7 +19,10 @@ def counting_measurement_test(variable_df, tradeoff=50):
     :param tradeoff: minimum number of measurements required
     :return: flag 1 if the measurement is accepted, 0 of it need to be removed
     """
-    return
+    if len(variable_df) >= tradeoff:
+        return 1
+    else:
+        return 0
 
 
 def noisy_profile_test(discrete_variable, percentage_tradeoff=0.1):
@@ -26,3 +32,6 @@ def noisy_profile_test(discrete_variable, percentage_tradeoff=0.1):
     :param percentage_tradeoff: tradeoff percentage of noisy points
     :return: flag 1 if the measurement is accepted, 0 of it need to be removed
     """
+    return
+
+

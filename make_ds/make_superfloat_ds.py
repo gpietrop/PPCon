@@ -6,6 +6,7 @@ import pandas as pd
 import netCDF4 as nc
 
 from discretization import dict_max_pressure, dict_interval
+from make_ds.preprocessing import *
 
 
 def find_nearest(array, value):
@@ -41,7 +42,7 @@ def read_date_time(date_time):
     month = month - 1
     day = int(date_time[6:8])
 
-    day_total = month + day
+    day_total = month * 30 + day
     day_rad = day_total * 2 * np.pi / 365
 
     return year, day_rad
@@ -57,7 +58,7 @@ def make_dict_single_float(path, date_time, variable):
         ds = nc.Dataset(path)  # Select sample
     except Exception as error:
         print('Caught this error: ' + repr(error))
-        return dict()
+        return dict(), 0
 
     lat = ds["LATITUDE"][:].data[0]
     lon = ds["LONGITUDE"][:].data[0]
@@ -69,21 +70,24 @@ def make_dict_single_float(path, date_time, variable):
     pres_temp_df = ds["PRES_TEMP"][:].data[:]
 
     if "DOXY" not in ds.variables.keys():
-        return dict()
+        return dict(), 0
     doxy_df = ds["DOXY"][:].data[:]
     pres_doxy_df = ds["PRES_DOXY"][:].data[:]
 
     if variable not in ds.variables.keys():
-        return dict()
+        return dict(), 0
     variable_df = ds[f"{variable}"][:].data[:]
     pres_variable_df = ds[f"PRES_{variable}"][:].data[:]
 
-    if variable == "CHLA" or variable == "BBP700":
-        if pres_variable_df[0] > 10 or pres_variable_df[-1] < 180:
-            return dict()
+    if variable == "CHLA":
+        flag_missing_extreme = missing_extreme_test(pres_variable_df=pres_variable_df, min_extreme=10, max_extreme=180)
+        flag_counting_measurement = counting_measurement_test(variable_df=variable_df, tradeoff=50)
 
     if variable == "BBP700":
+        flag_missing_extreme = missing_extreme_test(pres_variable_df=pres_variable_df, min_extreme=30, max_extreme=180)
+        flag_counting_measurement = counting_measurement_test(variable_df=variable_df, tradeoff=50)
         variable_df = variable_df * 1000
+
     max_pres = dict_max_pressure[variable]
     interval = dict_interval[variable]
 
@@ -94,33 +98,51 @@ def make_dict_single_float(path, date_time, variable):
     variable = discretize(pres_variable_df, variable_df, max_pres, interval)
     name_float = path[8:-3]
     if temp is None or psal is None or doxy is None or variable is None:
-        return dict()
+        return dict(), 0
+
     dict_float = {name_float: [year, day_rad, lat, lon, temp, psal, doxy, variable]}
-    return dict_float
+    flag = flag_missing_extreme * flag_counting_measurement  # if at least one of the flag is 0 then the final flag
+    # is zero
+
+    return dict_float, flag
 
 
 def make_dataset(path_float_index, variable):
     name_list = pd.read_csv(path_float_index, header=None).to_numpy()[:, 0].tolist()
     datetime_list = pd.read_csv(path_float_index, header=None).to_numpy()[:, 3].tolist()
 
-    dict_ds = dict()
+    dict_ds_accepted = dict()
+    dict_ds_removed = dict()
 
     for i in range(np.size(name_list)):
         path = os.getcwd() + "/ds/SUPERFLOAT/" + name_list[i]
         if not os.path.exists(path):
             continue
         date_time = datetime_list[i]
-        dict_single_float = make_dict_single_float(path, date_time, variable)
-        dict_ds = {**dict_ds, **dict_single_float}
+        dict_single_float, flag = make_dict_single_float(path, date_time, variable)
+        # dict_single_float = make_dict_single_float(path, date_time, variable)
 
-    return dict_ds
+        # dict_ds_accepted = {**dict_ds_accepted, **dict_single_float}
+        if flag == 1:
+            dict_ds_accepted = {**dict_ds_accepted, **dict_single_float}
+        if flag == 0: 
+            dict_ds_removed = {**dict_ds_removed, **dict_single_float}
+
+    return dict_ds_accepted, dict_ds_removed
 
 
 def make_pandas_df(path_float_index, variable):
-    dict_ds = make_dataset(path_float_index, variable)
-    pd_ds = pd.DataFrame(dict_ds, index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', variable])
+    dict_ds_accepted, dict_ds_removed = make_dataset(path_float_index, variable)
+    # dict_ds_accepted = make_dataset(path_float_index, variable)
 
-    pd_ds.to_csv(os.getcwd() + f'/ds/{variable}/float_ds_sf.csv')
+    pd_ds_accepted = pd.DataFrame(dict_ds_accepted,
+                                  index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', variable])
+    pd_ds_removed = pd.DataFrame(dict_ds_removed,
+                                 index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', variable])
+
+    pd_ds_accepted.to_csv(os.getcwd() + f'/ds/{variable}/float_ds_sf.csv')
+    pd_ds_removed.to_csv(os.getcwd() + f'/ds/{variable}/float_ds_sf_removed.csv')
+
     return
 
 
@@ -130,7 +152,7 @@ def make_toy_dataset(path_float_index, variable):
 
     dict_ds = dict()
 
-    for i in range(int(np.size(name_list)/20)):
+    for i in range(int(np.size(name_list) / 20)):
         path = os.getcwd() + "/ds/SUPERFLOAT/" + name_list[i]
         if not os.path.exists(path):
             continue
