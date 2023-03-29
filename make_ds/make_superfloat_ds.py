@@ -1,10 +1,12 @@
 import os
+import random
 
 import torch
 import numpy as np
 import pandas as pd
 import netCDF4 as nc
 
+from utils import shuffle_dict
 from discretization import dict_max_pressure, dict_interval
 from make_ds.preprocessing import *
 
@@ -79,6 +81,10 @@ def make_dict_single_float(path, date_time, variable):
     variable_df = ds[f"{variable}"][:].data[:]
     pres_variable_df = ds[f"PRES_{variable}"][:].data[:]
 
+    if variable == "NITRATE":
+        flag_missing_extreme = 1
+        flag_counting_measurement = 1
+
     if variable == "CHLA":
         flag_missing_extreme = missing_extreme_test(pres_variable_df=pres_variable_df, min_extreme=10, max_extreme=180)
         flag_counting_measurement = counting_measurement_test(variable_df=variable_df, tradeoff=50)
@@ -125,7 +131,7 @@ def make_dataset(path_float_index, variable):
         # dict_ds_accepted = {**dict_ds_accepted, **dict_single_float}
         if flag == 1:
             dict_ds_accepted = {**dict_ds_accepted, **dict_single_float}
-        if flag == 0: 
+        if flag == 0:
             dict_ds_removed = {**dict_ds_removed, **dict_single_float}
 
     return dict_ds_accepted, dict_ds_removed
@@ -133,14 +139,31 @@ def make_dataset(path_float_index, variable):
 
 def make_pandas_df(path_float_index, variable):
     dict_ds_accepted, dict_ds_removed = make_dataset(path_float_index, variable)
+    dict_ds_accepted = shuffle_dict(dict_ds_accepted)
     # dict_ds_accepted = make_dataset(path_float_index, variable)
 
-    pd_ds_accepted = pd.DataFrame(dict_ds_accepted,
-                                  index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', variable])
     pd_ds_removed = pd.DataFrame(dict_ds_removed,
                                  index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', variable])
 
-    pd_ds_accepted.to_csv(os.getcwd() + f'/ds/{variable}/float_ds_sf.csv')
+    train_frac = 0.8
+    train_size = int(train_frac * len(dict_ds_accepted))
+    val_size = len(dict_ds_accepted) - train_size
+
+    dict_ds_accepted_train = dict_ds_accepted.copy()
+    dict_ds_accepted_test = dict(list(dict_ds_accepted.items())[:val_size])
+    for key_test in dict_ds_accepted_test.keys():
+        dict_ds_accepted_train.pop(key_test, None)
+
+    pd_ds_accepted_train = pd.DataFrame(dict_ds_accepted_train,
+                                        index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', variable])
+    pd_ds_accepted_test = pd.DataFrame(dict_ds_accepted_test,
+                                       index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', variable])
+
+    # train_ds_accepted, test_ds_accepted = train_test_split(pd_ds_accepted, test_size=0.2, shuffle=True)
+
+    pd_ds_accepted_train.to_csv(os.getcwd() + f'/ds/{variable}/float_ds_sf_train.csv')
+    pd_ds_accepted_test.to_csv(os.getcwd() + f'/ds/{variable}/float_ds_sf_test.csv')
+
     pd_ds_removed.to_csv(os.getcwd() + f'/ds/{variable}/float_ds_sf_removed.csv')
 
     return

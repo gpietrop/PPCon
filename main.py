@@ -10,7 +10,6 @@ from train import train_model
 from dataset import FloatDataset
 from plot_profile import plot_profiles
 
-
 # Setting the computation device
 from utils import make_ds, save_ds_info
 
@@ -58,14 +57,20 @@ print(f"The dataset used is {training_folder}\nWe used a reduced version of the 
 make_ds(training_folder, variable=variable, flag_complete=1, flag_toy=1)
 
 if training_folder == "SUPERFLOAT":
-    path_ds = os.getcwd() + f"/ds/{variable}/toy_ds_sf.csv" if flag_toy else os.getcwd() + f"/ds/{variable}/float_ds_sf.csv"
-dataset = FloatDataset(path_ds)
+    path_ds_train = os.getcwd() + f"/ds/{variable}/toy_ds_sf.csv" if flag_toy else os.getcwd() + f"/ds/{variable}/float_ds_sf_train.csv"
+    path_ds_test = os.getcwd() + f"/ds/{variable}/toy_ds_sf.csv" if flag_toy else os.getcwd() + f"/ds/{variable}/float_ds_sf_test.csv"
 
-train_frac = 0.8
-train_size = int(train_frac * len(dataset))
-val_size = len(dataset) - train_size
+train_dataset = FloatDataset(path_ds_train)
+val_dataset = FloatDataset(path_ds_test)
 
-train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+# dataset = FloatDataset(path_ds)
+
+# train_frac = 0.8
+# train_size = int(train_frac * len(dataset))
+# val_size = len(dataset) - train_size
+
+# train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+# print(val_dataset)
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 

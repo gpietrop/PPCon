@@ -1,6 +1,13 @@
 import os
+import random
 
 import pandas as pd
+
+
+def shuffle_dict(my_dict):
+    items = list(my_dict.items())  # List of tuples of (key,values)
+    random.shuffle(items)
+    return dict(items)
 
 
 def make_ds(training_folder, variable, flag_complete=1, flag_toy=1):
@@ -10,14 +17,14 @@ def make_ds(training_folder, variable, flag_complete=1, flag_toy=1):
         if not os.path.exists(os.getcwd() + f"/ds/{variable}/"):
             os.mkdir(os.getcwd() + f"/ds/{variable}/")
 
-        if flag_complete and not os.path.exists(os.getcwd() + f"/ds/{variable}/float_ds_sf.csv"):
+        if flag_complete and not os.path.exists(os.getcwd() + f"/ds/{variable}/float_ds_sf_train.csv"):
             print("making ds...")
             make_pandas_df(os.getcwd() + '/ds/SUPERFLOAT/Float_Index.txt', variable=variable)
             print("superfloat complete ds created")
 
         if flag_toy and not os.path.exists(os.getcwd() + f"/ds/{variable}/toy_ds_sf.csv"):
             print("making ds...")
-            make_pandas_toy_df(os.getcwd() + '/ds/SUPERFLOAT/Float_Index.txt', variable=variable)
+            # make_pandas_toy_df(os.getcwd() + '/ds/SUPERFLOAT/Float_Index.txt', variable=variable)
             print("superfloat toy ds created")
 
     if training_folder == "CORIOLIS":
@@ -47,4 +54,3 @@ def save_ds_info(training_folder, flag_toy, batch_size, epochs, lr, dp_rate, lam
     pd_ds.to_csv(save_dir + '/info.csv')
 
     return
-
