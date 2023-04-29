@@ -13,10 +13,13 @@ dict_models = {
 my_var = "NITRATE"
 # plot_med(my_var, dict_models[my_var][0], dict_models[my_var][1], "train")
 
-for var in ["NITRATE"]:
+for var in ["NITRATE", "CHLA", "BBP700"]:
     date = dict_models[var][0]
     epoch = dict_models[var][1]
-    ga_profile("NWM", var, date, epoch, "test")
+    for ga in ["NWM", "SWM", "TYR", "ION", "LEV"]:
+        ga_profile(ga, var, date, epoch, "test")
+    # ga_variance("NWM", var, date, epoch, "test")
+
     # plot_scatter(var, date, epoch, "test")
 
     # all_profile(var, date, epoch, "test")

@@ -7,6 +7,7 @@ import torch
 from torch.nn.functional import mse_loss
 from torch.utils.data import DataLoader
 
+import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
 from mpl_toolkits.basemap import Basemap
@@ -26,7 +27,7 @@ dict_unit_measure = {"NITRATE": "mmol/m^3",
                      "BBP700": "1/m"}
 pal = sns.color_palette("magma")
 
-dict_color = {'NWM': pal[0], 'SWM': pal[1], 'TIR': pal[3], 'ION': pal[4], 'LEV': pal[5]}
+dict_color = {'NWM': pal[0], 'SWM': pal[1], 'TYR': pal[3], 'ION': pal[4], 'LEV': pal[5]}
 
 
 def count_samples(variable):
