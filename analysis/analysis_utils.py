@@ -23,7 +23,7 @@ sns.set_theme(context='notebook', style='whitegrid', palette='deep', font='sans-
 
 dict_unit_measure = {"NITRATE": "mmol/m^3",
                      "CHLA": "mg/m^3",
-                     "BBP700": " "}
+                     "BBP700": "1/m"}
 pal = sns.color_palette("magma")
 
 dict_color = {'NWM': pal[0], 'SWM': pal[1], 'TIR': pal[3], 'ION': pal[4], 'LEV': pal[5]}

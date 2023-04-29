@@ -68,6 +68,13 @@ def seasonal_profile(season, variable, date_model, epoch_model, mode):
 
 
 def ga_profile(ga, variable, date_model, epoch_model, mode):
+    path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/fig/"
+    if not os.path.exists(path_analysis):
+        os.mkdir(path_analysis)
+    path_analysis = path_analysis + "ga_prof/"
+    if not os.path.exists(path_analysis):
+        os.mkdir(path_analysis)
+
     dict_ga = {'NWM': [[40, 45], [-2, 9.5]],
                'SWM': [[32, 40], [-2, 9.5]],
                'TIR': [[37, 45], [9.5, 16]],
@@ -83,8 +90,10 @@ def ga_profile(ga, variable, date_model, epoch_model, mode):
     number_samples = len(generated_var_list)
     number_ga_samples = 0
     for index_sample in range(number_samples):
-        if dict_ga[ga][0][0] <= lat_list[i] <= dict_ga[ga][0][1] and dict_ga[ga][1][0] <= lon_list[i] <= dict_ga[ga][1][1]:
+        if dict_ga[ga][0][0] <= lat_list[index_sample] <= dict_ga[ga][0][1] and dict_ga[ga][1][0] <= lon_list[
+            index_sample] <= dict_ga[ga][1][1]:
             number_ga_samples += 1
+
             generated_profile = generated_profile + generated_var_list[index_sample]
             measured_profile = measured_profile + measured_var_list[index_sample]
 
@@ -93,12 +102,18 @@ def ga_profile(ga, variable, date_model, epoch_model, mode):
 
     max_pres = dict_max_pressure[variable]
     depth = np.linspace(0, max_pres, len(generated_profile.detach().numpy()))
-    plt.plot(generated_profile.detach().numpy(), depth, label=f"generated {variable}")
-    plt.plot(measured_profile.detach().numpy(), depth, label=f"measured {variable}")
+    plt.plot(generated_profile.detach().numpy(), depth,
+             linestyle="dashed", color=dict_color[ga], label=f"CNN generated")
+    plt.plot(measured_profile.detach().numpy(), depth,
+             linestyle="solid", color=dict_color[ga], label=f"measured")
     plt.gca().invert_yaxis()
 
+    plt.title(ga)
+    plt.xlabel(f"{variable} [{dict_unit_measure[variable]}]")
+    plt.ylabel('depth [m]')
+
     plt.legend()
-    plt.show()
+    plt.savefig(f"{path_analysis}profile_mean_{ga}_{mode}_{epoch_model}.png")
     plt.close()
 
     return
@@ -305,6 +320,42 @@ def seasonal_ga_list(season, ga, lat_list, lon_list, day_rad_list, generated_var
                 measured_profile.append(measured_var_list[i])
 
     return generated_profile, measured_profile
+
+
+def seasonal_ga_variance(season, ga, lat_list, lon_list, day_rad_list, generated_var_list, measured_var_list):
+    dict_ga = {'NWM': [[40, 45], [-2, 9.5]],
+               'SWM': [[32, 40], [-2, 9.5]],
+               'TIR': [[37, 45], [9.5, 16]],
+               'ION': [[30, 37], [9.5, 22]],
+               'LEV': [[30, 37], [22, 36]]}
+
+    dict_season = {'W': [0, 91], 'SP': [92, 182], 'SU': [183, 273], 'A': [274, 365]}
+
+    len_profile = int(generated_var_list[0].size(dim=0))
+
+    generated_profile = []
+    # measured_profile = []
+    number_samples = len(generated_var_list)
+    number_seasonal_samples = 0
+    for i in range(number_samples):
+        day_sample = from_day_rad_to_day(day_rad=day_rad_list[i])
+        if dict_season[season][0] <= day_sample <= dict_season[season][1]:
+            if dict_ga[ga][0][0] <= lat_list[i] <= dict_ga[ga][0][1] and dict_ga[ga][1][0] <= lon_list[i] <= \
+                    dict_ga[ga][1][1]:
+                number_seasonal_samples += 1
+                generated_profile.append(generated_var_list[i])
+                # measured_profile.append(measured_var_list[i])
+
+    std_reconstruction = torch.zeros(len_profile)
+    for k in range(len_profile):
+        reconstruction_depth = []
+        for prof in generated_profile:
+            reconstruction_depth.append(prof[k].item())
+        # print(reconstruction_depth)
+        std_reconstruction[k] = np.std(reconstruction_depth)
+
+    return std_reconstruction
+
 
 
 def seasonal_ga_variance(season, ga, lat_list, lon_list, day_rad_list, generated_var_list, measured_var_list):
