@@ -95,27 +95,50 @@ def seasonal_and_geographic_rmse(variable, date_model, epoch_model, mode):
     return list_loss, list_number_samples
 
 
-def make_dim_scatter(a_list):
-    list_scatter_dim = [250 if loss < 0.3 else 500 if 0.3 < loss < 0.6 else 1000 for loss in a_list]
+def make_dim_scatter(a_list, variable):
+    if variable == "NITRATE":
+        list_scatter_dim = [25 if loss < 0.3 else 150 if 0.3 < loss < 0.6 else 500 for loss in a_list]
+    if variable == "CHLA":
+        list_scatter_dim = [25 if loss < 0.01 else 150 if 0.01 < loss < 0.05 else 500 for loss in a_list]
+
     return list_scatter_dim
 
 
 def plot_scatter(variable, date_model, epoch_model, mode):
+    path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/fig/"
+    if not os.path.exists(path_analysis):
+        os.mkdir(path_analysis)
+
+    fig, ax = plt.subplots()
+
     list_loss, list_number_samples = seasonal_and_geographic_rmse(variable, date_model, epoch_model, "train")
     list_std = seasonal_and_geographic_std(variable, date_model, epoch_model, "train")
 
-    plt.scatter(list_std[0], list_number_samples[0], s=make_dim_scatter(list_loss[0]),
+    ax.scatter(list_std[0], list_number_samples[0], s=make_dim_scatter(list_loss[0], variable),
                 c=list(dict_color.values()), marker="^", label="winter")  # winter
-    plt.scatter(list_std[1], list_number_samples[1], s=make_dim_scatter(list_loss[1]),
-                c=list(dict_color.values()), marker="v", label="spring")  # spring
-    plt.scatter(list_std[2], list_number_samples[2], s=make_dim_scatter(list_loss[2]),
-                c=list(dict_color.values()), marker="<", label="summer")  # summer
-    plt.scatter(list_std[3], list_number_samples[3], s=make_dim_scatter(list_loss[3]),
-                c=list(dict_color.values()), marker=">", label="autumn")  # autumn
-    plt.legend()
+    scatter1 = ax.scatter(list_std[1], list_number_samples[1], s=make_dim_scatter(list_loss[1], variable),
+                c=list(dict_color.values()), marker="s", label="spring")  # spring
+    ax.scatter(list_std[2], list_number_samples[2], s=make_dim_scatter(list_loss[2], variable),
+                c=list(dict_color.values()), marker="o", label="summer")  # summer
+    ax.scatter(list_std[3], list_number_samples[3], s=make_dim_scatter(list_loss[3], variable),
+                c=list(dict_color.values()), marker="D", label="autumn")  # autumn
+
+    handles, labels = scatter1.legend_elements(prop="sizes", alpha=0.6)
+    if variable == "NITRATE":
+        ax.legend(handles, ["MAE<0.3", "0.3<MAE<0.6", "MAE>0.6"], loc="upper right", title="MAE")
+    if variable == "CHLA":
+        ax.legend(handles, ["MAE<0.01", "0.01<MAE<0.05", "MAE>0.05"], loc="upper right", title="MAE")
+
+    handles, labels = ax.get_legend_handles_labels()
+    leg = fig.legend(handles, labels, loc="lower right", title="season", markerscale=0.5)
+
+    for marker in leg.legendHandles:
+        marker.set_color("k")
+
     plt.xlabel("standard deviation")
     plt.ylabel("number of samples (training set)")
 
-    plt.show()
+    plt.savefig(f"{path_analysis}scatter_{mode}_{epoch_model}.png")
+    plt.close()
 
     return

@@ -1,8 +1,8 @@
-from analysis.profile import *
+# from analysis.profile import *
 # from analysis.rmse import *
 # from analysis.comparison_architecture import *
 # from maps import *
-# from all_toghether import *
+from all_toghether import *
 # get_reconstruction_comparison_presentation("NITRATE", "W", "2023-04-04_", 50, "test")
 
 dict_models = {
@@ -13,14 +13,14 @@ dict_models = {
 my_var = "NITRATE"
 # plot_med(my_var, dict_models[my_var][0], dict_models[my_var][1], "train")
 
-for var in ["NITRATE", "CHLA", "BBP700"]:
+for var in ["CHLA"]:
     date = dict_models[var][0]
     epoch = dict_models[var][1]
-    for ga in ["NWM", "SWM", "TYR", "ION", "LEV"]:
-        ga_profile(ga, var, date, epoch, "test")
+    # for ga in ["NWM", "SWM", "TYR", "ION", "LEV"]:
+    #     ga_profile(ga, var, date, epoch, "test")
     # ga_variance("NWM", var, date, epoch, "test")
 
-    # plot_scatter(var, date, epoch, "test")
+    plot_scatter(var, date, epoch, "test")
 
     # all_profile(var, date, epoch, "test")
     # profile_efficency(var, date, epoch, "test")
