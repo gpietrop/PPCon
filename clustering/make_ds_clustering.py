@@ -6,6 +6,7 @@ import pandas as pd
 import netCDF4 as nc
 
 from discretization import dict_max_pressure, dict_interval
+from make_ds.preprocessing import *
 
 # from make_ds.preprocessing import *
 
@@ -53,7 +54,7 @@ def read_date_time(date_time):
     month = month - 1
     day = int(date_time[6:8])
 
-    day_total = month + day
+    day_total = month * 30 + day
     day_rad = day_total * 2 * np.pi / 365
 
     return year, day_rad
@@ -101,24 +102,30 @@ def make_dict_single_float(path, date_time):
     else:
         chla_df = ds["CHLA"][:].data[:]
         pres_chla_df = ds["PRES_CHLA"][:].data[:]
-        chla = discretize(pres_chla_df, chla_df, max_pres_chla, interval_chla)
+        if missing_extreme_test(pres_variable_df=pres_chla_df, min_extreme=10,
+                                max_extreme=180) and counting_measurement_test(variable_df=chla_df, tradeoff=50):
+            chla = discretize(pres_chla_df, chla_df, max_pres_chla, interval_chla)
+        else:
+            return dict()
 
     if "BBP700" not in ds.variables.keys():
         BBP700 = torch.zeros(int(max_pres_BBP700 / interval_BBP700))
     else:
         BBP700_df = ds["BBP700"][:].data[:]
         pres_BBP700_df = ds["PRES_BBP700"][:].data[:]
-        BBP700 = discretize(pres_BBP700_df, BBP700_df, max_pres_BBP700, interval_BBP700)
+        if missing_extreme_test(pres_variable_df=pres_BBP700_df, min_extreme=30,
+                                max_extreme=180) and counting_measurement_test(variable_df=BBP700_df, tradeoff=50):
+            BBP700_df = BBP700_df * 1000
+            BBP700 = discretize(pres_BBP700_df, BBP700_df, max_pres_BBP700, interval_BBP700)
+        else:
+            return dict()
 
     name_float = path[8:-3]
     if temp is None or psal is None or doxy is None or nitrate is None or chla is None or BBP700 is None:
         return dict()
-    # print(nitrate.shape)
     dict_float = {name_float: [year, day_rad, lat, lon, temp, psal, doxy, nitrate, chla, BBP700]}
-    # flag = flag_missing_extreme * flag_counting_measurement  # if at least one of the flag is 0 then the final flag
-    # is zero
 
-    return dict_float  # , flag
+    return dict_float
 
 
 def make_dataset(path_float_index):
@@ -145,7 +152,8 @@ def make_pandas_df(path_float_index):
     dict_ds_accepted = make_dataset(path_float_index)
 
     pd_ds_accepted = pd.DataFrame(dict_ds_accepted,
-                                  index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', 'nitrate', 'chla', 'BBP700'])
+                                  index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', 'nitrate', 'chla',
+                                         'BBP700'])
     # pd_ds_removed = pd.DataFrame(dict_ds_removed,
     #                              index=['year', 'day_rad', 'lat', 'lon', 'temp', 'psal', 'doxy', variable])
 

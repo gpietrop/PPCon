@@ -1,11 +1,26 @@
 import torch
 import matplotlib.pyplot as plt
+import os
+import pandas as pd
 
-x = torch.rand([1, 1, 200])  # shape of the signal
-print(x[0, 0, :].shape)
-x = x[0, 0, :]
-plt.plot(x)
-plt.show()
+import numpy as np
+import netCDF4 as nc
+
+# name_list = pd.read_csv(os.getcwd() + '/../ds/SUPERFLOAT/Float_Index.txt', header=None).to_numpy()[:, 0].tolist()
+# datetime_list = pd.read_csv(os.getcwd() + '/../ds/SUPERFLOAT/Float_Index.txt', header=None).to_numpy()[:, 3].tolist()
+
+i = 0
+path = os.getcwd() + "/../ds/SUPERFLOAT/data_from_Mediterranean.nc"
+
+# date_time = datetime_list[i]
+
+ds = nc.Dataset(path)  # Select sample
+
+print(ds)
+
+lat = ds["var2"][:].data
+
+print(lat)
 
 """
 model = MLPDay()
@@ -53,6 +68,3 @@ tens = torch.zeros(200)
 for index in range(len(temp)):
     tens[index] = torch.tensor(float(temp[index]))
 """
-
-
-
