@@ -13,7 +13,7 @@ dict_models = {
 my_var = "NITRATE"
 # plot_med(my_var, dict_models[my_var][0], dict_models[my_var][1], "train")
 
-for var in ["CHLA"]:
+for var in ["NITRATE"]:
     date = dict_models[var][0]
     epoch = dict_models[var][1]
     # for ga in ["NWM", "SWM", "TYR", "ION", "LEV"]:

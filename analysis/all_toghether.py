@@ -1,3 +1,6 @@
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+
 from analysis_utils import *
 
 # i need the rmse
@@ -17,7 +20,6 @@ dict_season = {'W': [0, 91], 'SP': [92, 182], 'SU': [183, 273], 'A': [274, 365]}
 
 
 def seasonal_ga_variance(season, ga, lat_list, lon_list, day_rad_list, generated_var_list, measured_var_list):
-
     len_profile = int(generated_var_list[0].size(dim=0))
 
     generated_profile = []
@@ -100,6 +102,8 @@ def make_dim_scatter(a_list, variable):
         list_scatter_dim = [25 if loss < 0.3 else 150 if 0.3 < loss < 0.6 else 500 for loss in a_list]
     if variable == "CHLA":
         list_scatter_dim = [25 if loss < 0.01 else 150 if 0.01 < loss < 0.05 else 500 for loss in a_list]
+    if variable == "BBP700":
+        list_scatter_dim = [25 if loss < 0.00000005 else 150 if 0.00000005 < loss < 0.0000001 else 500 for loss in a_list]
 
     return list_scatter_dim
 
@@ -109,36 +113,67 @@ def plot_scatter(variable, date_model, epoch_model, mode):
     if not os.path.exists(path_analysis):
         os.mkdir(path_analysis)
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(14, 4))
 
     list_loss, list_number_samples = seasonal_and_geographic_rmse(variable, date_model, epoch_model, "train")
     list_std = seasonal_and_geographic_std(variable, date_model, epoch_model, "train")
 
     ax.scatter(list_std[0], list_number_samples[0], s=make_dim_scatter(list_loss[0], variable),
-                c=list(dict_color.values()), marker="^", label="winter")  # winter
-    scatter1 = ax.scatter(list_std[1], list_number_samples[1], s=make_dim_scatter(list_loss[1], variable),
-                c=list(dict_color.values()), marker="s", label="spring")  # spring
+               c=list(dict_color.values()), marker="^", label="winter", alpha=0.6)  # winter
+    ax.scatter(list_std[1], list_number_samples[1], s=make_dim_scatter(list_loss[1], variable),
+               c=list(dict_color.values()), marker="s", label="spring", alpha=0.6)  # spring
     ax.scatter(list_std[2], list_number_samples[2], s=make_dim_scatter(list_loss[2], variable),
-                c=list(dict_color.values()), marker="o", label="summer")  # summer
+               c=list(dict_color.values()), marker="o", label="summer", alpha=0.6)  # summer
     ax.scatter(list_std[3], list_number_samples[3], s=make_dim_scatter(list_loss[3], variable),
-                c=list(dict_color.values()), marker="D", label="autumn")  # autumn
+               c=list(dict_color.values()), marker="D", label="autumn", alpha=0.6)  # autumn
 
-    handles, labels = scatter1.legend_elements(prop="sizes", alpha=0.6)
+    # legend 1 -- MAE dimension
+    # handles, labels = scatter1.legend_elements(prop="sizes", alpha=0.6)
+    legend_elements = [Line2D([0], [0], marker='o', color='w', markerfacecolor='k', markersize=8),
+                       Line2D([0], [0], marker='o', color='w', markerfacecolor='k', markersize=13),
+                       Line2D([0], [0], marker='o', color='w', markerfacecolor='k', markersize=18)
+                       ]
+
     if variable == "NITRATE":
-        ax.legend(handles, ["MAE<0.3", "0.3<MAE<0.6", "MAE>0.6"], loc="upper right", title="MAE")
+        un_meas = dict_unit_measure["NITRATE"]
+        lg1 = ax.legend(legend_elements, ["MAE<0.3", "0.3<MAE<0.6", "MAE>0.6"],
+                        bbox_to_anchor=(1.0, 1.0), loc="upper left", title=f"MAE {un_meas}")
     if variable == "CHLA":
-        ax.legend(handles, ["MAE<0.01", "0.01<MAE<0.05", "MAE>0.05"], loc="upper right", title="MAE")
+        un_meas = dict_unit_measure["CHLA"]
+        lg1 = ax.legend(legend_elements, ["MAE<0.01", "0.01<MAE<0.05", "MAE>0.05"],
+                        bbox_to_anchor=(1.0, 1.0), loc="upper left", title=f"MAE {un_meas}")
+    if variable == "CHLA":
+        un_meas = dict_unit_measure["BBP700"]
+        lg1 = ax.legend(legend_elements, ["MAE<0.1e-7", "0.1e-7<MAE<0.5e-7", "MAE>0.5e-7"],
+                        bbox_to_anchor=(1.0, 1.0), loc="upper left", title=f"MAE {un_meas}")
 
+
+
+    # legend 2 -- season
     handles, labels = ax.get_legend_handles_labels()
-    leg = fig.legend(handles, labels, loc="lower right", title="season", markerscale=0.5)
+    lg2 = ax.legend(handles, labels, bbox_to_anchor=(1.0, 0.7), loc="upper left", title="season", markerscale=0.5)
 
-    for marker in leg.legendHandles:
+    for marker in lg2.legendHandles:
         marker.set_color("k")
 
-    plt.xlabel("standard deviation")
+    # legend 3 -- ga
+    legend_elements = [Patch(facecolor=list(dict_color.values())[0], edgecolor='k', label=list(dict_color.keys())[0]),
+                       Patch(facecolor=list(dict_color.values())[1], edgecolor='k', label=list(dict_color.keys())[1]),
+                       Patch(facecolor=list(dict_color.values())[2], edgecolor='k', label=list(dict_color.keys())[2]),
+                       Patch(facecolor=list(dict_color.values())[3], edgecolor='k', label=list(dict_color.keys())[3]),
+                       Patch(facecolor=list(dict_color.values())[4], edgecolor='k', label=list(dict_color.keys())[4]),
+                       ]
+    lg3 = ax.legend(handles=legend_elements, bbox_to_anchor=(1.0, 0.3), loc="upper left", title="geographic area")
+
+    ax.add_artist(lg1)
+    ax.add_artist(lg2)
+    ax.add_artist(lg3)
+
+    plt.xlabel(f"standard deviation {un_meas}")
     plt.ylabel("number of samples (training set)")
 
     plt.savefig(f"{path_analysis}scatter_{mode}_{epoch_model}.png")
+    plt.show()
     plt.close()
 
     return
