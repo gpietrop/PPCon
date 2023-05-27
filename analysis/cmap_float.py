@@ -1,28 +1,31 @@
 import os
 
-import matplotlib
 import numpy as np
 import netCDF4 as nc
 
+import matplotlib
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 from discretization import *
 from make_ds.make_superfloat_ds import discretize
 
 # I need as input the folder which contains float measurements and then take all the float vector one after each other
 
+sns.set_theme(context='paper', style='white', font='sans-serif', font_scale=1.5,
+              color_codes=True, rc=None)
+
+dict_unit_measure = {"NITRATE": r"$\frac{mmol}{m^3}$",
+                     "CHLA": r"$\frac{mg}{m^3}$",
+                     "BBP700": r"$\frac{1}{m}$"}
+
+pal = sns.color_palette("magma")
+
 dir_list = os.listdir(f"/Users/admin/Desktop/ppcon/ds/SUPERFLOAT_PPCon/")
 for var in ["NITRATE", "CHLA", "BBP700"]:
     for folder_name in dir_list:  # ["6901773"]:
         if folder_name[0] == "F" or folder_name[0] == ".":
             continue
-
-        if var == "CHLA":
-            maxmax = 0.5
-            minmin = 0.0
-        if var == "BBP700":
-            maxmax = 0.004
-            minmin = 0.000
 
         folder_path = f"/Users/admin/Desktop/ppcon/ds/SUPERFLOAT_PPCon/{folder_name}"
 
@@ -49,12 +52,23 @@ for var in ["NITRATE", "CHLA", "BBP700"]:
 
             date = ds["REFERENCE_DATE_TIME"][:]
             date = [str(np.ma.getdata(date)[k])[2] for k in range(len(date))]
-            date = date[0] + date[1] + date[2] + date[3] + " " + date[4] + date[5]
+            date = date[4] + date[5] + "/" + date[0] + date[1] + date[2] + date[3]
             x_ticks.append(date)
 
             if not flag_print:
                 lat = float(ds["LATITUDE"][:])
                 lon = float(ds["LONGITUDE"][:])
+
+                if var == "CHLA":
+                    if lon < 12:
+                        maxmax = 1
+                    else:
+                        maxmax = 0.5
+                    minmin = -0.02
+                if var == "BBP700":
+                    maxmax = 0.004
+                    minmin = 0.000
+
                 flag_print = 1
 
             if "DOXY" not in ds.variables.keys():
@@ -101,15 +115,18 @@ for var in ["NITRATE", "CHLA", "BBP700"]:
             if var == "NITRATE":
                 minmin = 0
                 max = np.max([np.max(matrix_measured), np.max(matrix_generated), 0])
-                maxmax = 8
+                maxmax = np.min([8, max])
         except Exception as error:
             continue
 
-        if np.max(matrix_measured) <= 0:
+        try:
+            if np.max(matrix_measured) <= 0:
+                continue
+        except Exception as error:
             continue
 
         x_number_ticks = np.arange(0, index)
-        fig, axs = plt.subplots(2, figsize=(6, 5))
+        fig, axs = plt.subplots(2, figsize=(8.8, 6))
 
         cmap = matplotlib.cm.get_cmap('viridis').copy()
         cmap.set_under('white')
@@ -120,23 +137,32 @@ for var in ["NITRATE", "CHLA", "BBP700"]:
         axs[0].set_title("Measured")
         axs[0].set_xticks([])
         axs[0].set_yticks(np.arange(0, 200)[::50], np.arange(0, dict_max_pressure[var], dict_interval[var])[::50])
+        axs[0].set_ylabel(r"depth [$m$]")
 
         im2 = axs[1].imshow(matrix_generated, vmin=minmin, vmax=maxmax,
                             cmap=cmap,
                             aspect='auto')  # , interpolation="bilinear")
         axs[1].set_title("PPCon prediction")
-        axs[1].set_xticks(x_number_ticks[::25], x_ticks[::25], rotation=45)
-        axs[1].tick_params(axis='x', labelsize=7)
+        try:
+            axs[1].set_xticks(x_number_ticks[::20], x_ticks[::20], rotation=45)
+        except Exception as error:
+            continue
+        axs[1].tick_params(axis='x', labelsize=10)
         axs[1].set_yticks(np.arange(0, 200)[::50], np.arange(0, dict_max_pressure[var], dict_interval[var])[::50])
+        axs[1].set_ylabel(r"depth [$m$]")
+        axs[1].set_xlabel(r"date")
+
+        fig.suptitle(f"{folder_name}")
+        plt.tight_layout()
 
         fig.subplots_adjust(right=0.85)
-        cbar_ax = fig.add_axes([0.88, 0.15, 0.04, 0.7])
-        fig.colorbar(im2, cax=cbar_ax)
+        cbar_ax = fig.add_axes([0.88, 0.15, 0.025, 0.7])
+        cb = fig.colorbar(im1,  cax=cbar_ax, label=f"{var} [{dict_unit_measure[var]}]", shrink=0.1) #
 
-        fig.suptitle(f"lat: {round(lat, 2)}   lon: {round(lon, 2)}")
+        cb_ticks = [float(cb.ax.get_yticklabels()[el].get_text()) for el in range(len(cb.ax.get_yticklabels()))]
+        cb.ax.set_yticklabels(['{:,.0e}'.format(x) for x in cb_ticks], fontsize=8)
 
-        # plt.colorbar()
-        plt.savefig(f"/Users/admin/Desktop/ppcon/results/cmap/{var}/{folder_name}.png")
+        plt.savefig(f"/Users/admin/Desktop/ppcon/results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png")
 
-        plt.show()
+        # plt.show()
         plt.close()
