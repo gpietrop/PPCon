@@ -1,9 +1,7 @@
 import os
 
 import numpy as np
-import torch
 import netCDF4 as nc
-from sklearn.metrics import mean_absolute_error
 
 import matplotlib.pyplot as plt
 
@@ -12,10 +10,10 @@ from make_ds.make_superfloat_ds import discretize
 
 # I need as input the folder which contains float measurements and then take all the float vector one after each other
 
-dir_list = os.listdir(f"/home/gpietropolli/Desktop/canyon-float/ds/SUPERFLOAT_PPCon/")
-for var in ["BBP700"]:
+dir_list = os.listdir(f"/Users/admin/Desktop/ppcon/ds/SUPERFLOAT_PPCon/")
+for var in ["NITRATE", "CHLA", "BBP700"]:
     for folder_name in dir_list: # ["6901773"]:
-        if folder_name[0] == "F":
+        if folder_name[0] == "F" or folder_name[0] == ".":
             continue
 
         if var == "CHLA":
@@ -25,7 +23,7 @@ for var in ["BBP700"]:
             maxmax = 0.004
             minmin = 0.000
 
-        folder_path = f"/home/gpietropolli/Desktop/canyon-float/ds/SUPERFLOAT_PPCon/{folder_name}"
+        folder_path = f"/Users/admin/Desktop/ppcon/ds/SUPERFLOAT_PPCon/{folder_name}"
 
         # get ordere list of measurements
         files = os.listdir(folder_path)
@@ -45,6 +43,13 @@ for var in ["BBP700"]:
             except Exception as error:
                 continue
 
+            if not flag_print:
+                lat = float(ds["LATITUDE"][:])
+                lon = float(ds["LONGITUDE"][:])
+                # print(f"latitude: {lat}")
+                # print(f"longitude: {lon}")
+                flag_print = 1
+
             if "DOXY" not in ds.variables.keys():
                 counter_discarded -= 1
                 continue
@@ -53,13 +58,6 @@ for var in ["BBP700"]:
                 # print("float discarded")
                 counter_discarded -= 1
                 continue
-
-            if not flag_print:
-                lat = float(ds["LATITUDE"][:])
-                lon = float(ds["LONGITUDE"][:])
-                # print(f"latitude: {lat}")
-                # print(f"longitude: {lon}")
-                flag_print = 1
 
             var_measured = ds[var][:].data
             pres_var_measured = ds[f"PRES_{var}"][:].data
@@ -108,7 +106,7 @@ for var in ["BBP700"]:
         fig.suptitle(f"lat: {round(lat, 2)}   lon: {round(lon, 2)}")
 
         # plt.colorbar()
-        plt.savefig(f"/home/gpietropolli/Desktop/canyon-float/results/cmap/{var}/{folder_name}.png")
+        plt.savefig(f"/Users/admin/Desktop/ppcon/results/cmap/{var}/{folder_name}.png")
 
         # plt.show()
         plt.close()
