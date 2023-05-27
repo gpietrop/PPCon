@@ -1,6 +1,6 @@
 import matplotlib
 
-from analysis_utils import *
+from utils_analysis import *
 
 
 def rmse(variable, date_model, epoch_model, mode):

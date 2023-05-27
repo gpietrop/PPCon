@@ -7,8 +7,22 @@ import torch
 from torch.utils.data import DataLoader
 
 from discretization import *
+from make_ds.make_superfloat_ds import discretize
 from utils import upload_and_evaluate_model, get_output
-from dataset_with_float_names import FloatDataset
+from dataset import FloatDataset as FloatDebug  # BUG!!!!!!!!!!11
+from dataset_with_float_names import FloatDataset  # BUG!!!!!!!!!!11
+
+import matplotlib.pyplot as plt
+
+
+max_pres_nitrate = dict_max_pressure["NITRATE"]
+interval_nitrate = dict_interval["NITRATE"]
+
+max_pres_chla = dict_max_pressure["CHLA"]
+interval_chla = dict_interval["CHLA"]
+
+max_pres_BBP700 = dict_max_pressure["BBP700"]
+interval_BBP700 = dict_interval["BBP700"]
 
 dict_models = {
     "NITRATE": ["2023-04-04_", 50],
@@ -38,9 +52,12 @@ model_day_BBP700, model_year_BBP700, model_lat_BBP700, model_lon_BBP700, model_B
     dir_model=dir_model_BBP700, info_model=info_BBP700, ep=dict_models["BBP700"][1])
 
 # read the float number + sampling number from the dataset
-path_df = f"/home/gpietropolli/Desktop/canyon-float/ds/clustering/ds_sf_clustering.csv"
+path_df = f"/home/gpietropolli/Desktop/canyon-float/ds/clustering/ds_sf_clustering.csv"  # BUG!!!!!!!
+path_debug = f"/home/gpietropolli/Desktop/canyon-float/ds/CHLA/float_ds_sf.csv"
 dataset = FloatDataset(path_df)
+dataset_debug = FloatDebug(path_debug)
 my_ds = DataLoader(dataset, shuffle=True)
+my_ds_debug = DataLoader(dataset_debug, shuffle=True)
 
 # information related to the pres of PPCon generated variables
 pres_nitrate = np.arange(0, dict_max_pressure["NITRATE"], dict_interval["NITRATE"])
@@ -51,15 +68,25 @@ qc = np.ones(200) * -9999
 
 for sample in my_ds:
     year, day_rad, lat, lon, temp, psal, doxy, nitrate, chla, BBP700, name_float = sample
+    # year, day_rad, lat, lon, temp, psal, doxy, chla = sample
     sample_prediction = sample[:-1]
 
     name_file = name_float[0]
     main_dir = name_float[0][2:-4]
-    print(f"generating profiles {name_file}")
+    # print(f"generating profiles {name_file}")
 
     # open the netcfd file in the "ds/SUPERFLOAT" directory
     path_superfloat = f"/home/gpietropolli/Desktop/canyon-float/ds/SUPERFLOAT_PPCon/{main_dir}/{name_file}.nc"
     ds = nc.Dataset(path_superfloat, 'a')  # ds = nc.Dataset(path_superfloat)
+
+    pres_temp_nc = ds["PRES_TEMP"][:]
+    temp_nc = ds["TEMP"][:]
+
+    pres_psal_nc = ds["PRES_PSAL"][:]
+    psal_nc = ds["PSAL"][:]
+
+    pres_doxy_nc = ds["PRES_DOXY"][:]
+    doxy_nc = ds["DOXY"][:]
 
     # create the dimension relative to the PPCon prediction
     if {'nNITRATE_PPCON', 'nCHLA_PPCON', 'nBBP700_PPCON'} & set(ds.dimensions.keys()):
@@ -105,11 +132,31 @@ for sample in my_ds:
     nc_qc_nitrate_ppcon[:] = qc
 
     # CHLA routine
+    temp_chla = discretize(pres_temp_nc, temp_nc, max_pres_chla, interval_chla)
+    psal_chla = discretize(pres_psal_nc, psal_nc, max_pres_chla, interval_chla)
+    doxy_chla = discretize(pres_doxy_nc, doxy_nc, max_pres_chla, interval_chla)
+
+    sample_prediction[4] = temp_chla.unsqueeze(0)
+    sample_prediction[5] = psal_chla.unsqueeze(0)
+    sample_prediction[6] = doxy_chla.unsqueeze(0)
+
+    # plt.plot(np.arange(0, 200, 1), temp.numpy(), label="measured")
+    # plt.plot(pres_temp_nc, temp_nc, label="generated")
+    # plt.legend()
+    # plt.show()
+    # plt.close()
+
     chla_ppcon = get_output(sample=sample_prediction, model_day=model_day_chla, model_year=model_year_chla,
                             model_lat=model_lat_chla, model_lon=model_lon_chla, model=model_chla)
     chla_ppcon = chla_ppcon.detach()
     chla_ppcon = torch.squeeze(chla_ppcon)
     chla_ppcon = chla_ppcon.numpy()
+
+    # plt.plot(chla.numpy()[0], label="measured")
+    # plt.plot(chla_ppcon, label="generated")
+    # plt.legend()
+    # plt.show()
+    # plt.close()
 
     if "CHLA" not in ds.variables.keys():
         ds.createDimension('nCHLA', 200)
@@ -138,6 +185,14 @@ for sample in my_ds:
     nc_qc_chla_ppcon[:] = qc
 
     # BBP700 routine
+    temp_BBP700 = discretize(pres_temp_nc, temp_nc, max_pres_BBP700, interval_BBP700)
+    psal_BBP700 = discretize(pres_psal_nc, psal_nc, max_pres_BBP700, interval_BBP700)
+    doxy_BBP700 = discretize(pres_doxy_nc, doxy_nc, max_pres_BBP700, interval_BBP700)
+
+    sample_prediction[4] = temp_BBP700.unsqueeze(0)
+    sample_prediction[5] = psal_BBP700.unsqueeze(0)
+    sample_prediction[6] = doxy_BBP700.unsqueeze(0)
+
     BBP700_ppcon = get_output(sample=sample_prediction, model_day=model_day_BBP700, model_year=model_year_BBP700,
                               model_lat=model_lat_BBP700, model_lon=model_lon_BBP700, model=model_BBP700)
     BBP700_ppcon = BBP700_ppcon.detach()

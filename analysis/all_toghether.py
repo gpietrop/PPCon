@@ -1,14 +1,7 @@
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
-from analysis_utils import *
-
-# i need the rmse
-
-# i need the standard deviation
-
-# i need the number of samples
-
+from utils_analysis import *
 
 dict_ga = {'NWM': [[40, 45], [-2, 9.5]],
            'SWM': [[32, 40], [-2, 9.5]],
@@ -103,7 +96,7 @@ def make_dim_scatter(a_list, variable):
     if variable == "CHLA":
         list_scatter_dim = [25 if loss < 0.01 else 150 if 0.01 < loss < 0.05 else 500 for loss in a_list]
     if variable == "BBP700":
-        list_scatter_dim = [25 if loss < 0.00000005 else 150 if 0.00000005 < loss < 0.0000001 else 500 for loss in a_list]
+        list_scatter_dim = [25 if loss < 0.00000005 else 150 if 0.00000005 < loss < 0.00000015 else 500 for loss in a_list]
 
     return list_scatter_dim
 
@@ -113,7 +106,9 @@ def plot_scatter(variable, date_model, epoch_model, mode):
     if not os.path.exists(path_analysis):
         os.mkdir(path_analysis)
 
-    fig, ax = plt.subplots(figsize=(14, 4))
+    # fig, ax = plt.subplots(figsize=(8, 5))
+    fig = plt.figure(figsize=(8, 5))
+    ax = fig.add_axes([0.1, 0.1, 0.6, 0.75])
 
     list_loss, list_number_samples = seasonal_and_geographic_rmse(variable, date_model, epoch_model, "train")
     list_std = seasonal_and_geographic_std(variable, date_model, epoch_model, "train")
@@ -129,24 +124,23 @@ def plot_scatter(variable, date_model, epoch_model, mode):
 
     # legend 1 -- MAE dimension
     # handles, labels = scatter1.legend_elements(prop="sizes", alpha=0.6)
-    legend_elements = [Line2D([0], [0], marker='o', color='w', markerfacecolor='k', markersize=8),
-                       Line2D([0], [0], marker='o', color='w', markerfacecolor='k', markersize=13),
-                       Line2D([0], [0], marker='o', color='w', markerfacecolor='k', markersize=18)
+    legend_elements = [Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markersize=8),
+                       Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markersize=13),
+                       Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markersize=18)
                        ]
 
     if variable == "NITRATE":
         un_meas = dict_unit_measure["NITRATE"]
         lg1 = ax.legend(legend_elements, ["MAE<0.3", "0.3<MAE<0.6", "MAE>0.6"],
-                        bbox_to_anchor=(1.0, 1.0), loc="upper left", title=f"MAE {un_meas}")
+                        bbox_to_anchor=(1.0, 1.0), loc="upper left", title=f"MAE [{un_meas}]")
     if variable == "CHLA":
         un_meas = dict_unit_measure["CHLA"]
         lg1 = ax.legend(legend_elements, ["MAE<0.01", "0.01<MAE<0.05", "MAE>0.05"],
-                        bbox_to_anchor=(1.0, 1.0), loc="upper left", title=f"MAE {un_meas}")
-    if variable == "CHLA":
+                        bbox_to_anchor=(1.0, 1.0), loc="upper left", title=f"MAE [{un_meas}]")
+    if variable == "BBP700":
         un_meas = dict_unit_measure["BBP700"]
-        lg1 = ax.legend(legend_elements, ["MAE<0.1e-7", "0.1e-7<MAE<0.5e-7", "MAE>0.5e-7"],
-                        bbox_to_anchor=(1.0, 1.0), loc="upper left", title=f"MAE {un_meas}")
-
+        lg1 = ax.legend(legend_elements, ["MAE<0.5e-8", "0.5e-8<MAE<1.5e-8", "MAE>1.5e-8"],
+                        bbox_to_anchor=(1.0, 1.0), loc="upper left", title=f"MAE [{un_meas}]")
 
 
     # legend 2 -- season
@@ -163,17 +157,20 @@ def plot_scatter(variable, date_model, epoch_model, mode):
                        Patch(facecolor=list(dict_color.values())[3], edgecolor='k', label=list(dict_color.keys())[3]),
                        Patch(facecolor=list(dict_color.values())[4], edgecolor='k', label=list(dict_color.keys())[4]),
                        ]
-    lg3 = ax.legend(handles=legend_elements, bbox_to_anchor=(1.0, 0.3), loc="upper left", title="geographic area")
+    lg3 = ax.legend(handles=legend_elements, bbox_to_anchor=(1.0, 0.35), loc="upper left", title="geographic area")
 
     ax.add_artist(lg1)
     ax.add_artist(lg2)
     ax.add_artist(lg3)
 
-    plt.xlabel(f"standard deviation {un_meas}")
+    # ax.xaxis.set_major_formatter(FormatStrFormatter('% 1.2f'))
+    import matplotlib
+    ax.xaxis.set_major_formatter(matplotlib.ticker.StrMethodFormatter('{x:,.0e}'))
+    plt.xlabel(f"standard deviation [{un_meas}]")
     plt.ylabel("number of samples (training set)")
 
     plt.savefig(f"{path_analysis}scatter_{mode}_{epoch_model}.png")
-    plt.show()
+    # plt.show()
     plt.close()
 
     return

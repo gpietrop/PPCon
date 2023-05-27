@@ -19,12 +19,13 @@ from other_methods.suazade import get_suazade_profile
 from other_methods.gloria import get_gloria_profile
 
 
-sns.set_theme(context='notebook', style='whitegrid', palette='deep', font='sans-serif', font_scale=1,
+sns.set_theme(context='paper', style='whitegrid', font='sans-serif', font_scale=1.5,
               color_codes=True, rc=None)
 
-dict_unit_measure = {"NITRATE": "mmol/m^3",
-                     "CHLA": "mg/m^3",
-                     "BBP700": "1/m"}
+dict_unit_measure = {"NITRATE": r"$\frac{mmol}{m^3}$",
+                     "CHLA": r"$\frac{mg}{m^3}$",
+                     "BBP700": r"$\frac{1}{m}$"}
+
 pal = sns.color_palette("magma")
 
 dict_color = {'NWM': pal[0], 'SWM': pal[1], 'TYR': pal[3], 'ION': pal[4], 'LEV': pal[5]}

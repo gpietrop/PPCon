@@ -1,74 +1,14 @@
-from analysis_utils import *
+from utils_analysis import *
 
 
-def seasonal_bp(variable, date_model, epoch_model, mode):
-    path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/"
-    if not os.path.exists(path_analysis):
-        os.mkdir(path_analysis)
-
-    dict_season = {'W': [0, 91], 'SP': [92, 182], 'SU': [183, 273], 'A': [274, 365]}
-    list_loss_for_season = [[] for i in range(4)]
-
-    lat_list, lon_list, day_rad_list, generated_var_list, measured_var_list = get_reconstruction(variable, date_model,
-                                                                                                 epoch_model, mode)
-    number_samples = len(generated_var_list)
-    for index_season in range(4):
-        season = list(dict_season.keys())[index_season]
-        for index_sample in range(number_samples):
-            day_sample = from_day_rad_to_day(day_rad=day_rad_list[index_sample])
-            if dict_season[season][0] <= day_sample <= dict_season[season][1]:
-                loss_sample = mse_loss(generated_var_list[index_sample], measured_var_list[index_sample])
-                list_loss_for_season[index_season].append(loss_sample)
-
-    sns.boxplot(data=list_loss_for_season,
-                showfliers=False)
-    plt.xticks(range(4), list(dict_season.keys()))
-    plt.show()
-    plt.close()
-
-    return
-
-
-def geographic_bp(variable, date_model, epoch_model, mode):
-    path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/"
-    if not os.path.exists(path_analysis):
-        os.mkdir(path_analysis)
-
-    dict_ga = {'NWM': [[40, 45], [-2, 9.5]],
-               'SWM': [[32, 40], [-2, 9.5]],
-               'TIR': [[37, 45], [9.5, 16]],
-               'ION': [[30, 37], [9.5, 22]],
-               'LEV': [[30, 37], [22, 36]]}
-    list_loss_ga = [[] for _ in range(len(list(dict_ga.keys())))]
-
-    lat_list, lon_list, day_rad_list, generated_var_list, measured_var_list = get_reconstruction(variable, date_model,
-                                                                                                 epoch_model, mode)
-    number_samples = len(generated_var_list)
-    for index_ga in range(len(list(dict_ga.keys()))):
-        ga = list(dict_ga.keys())[index_ga]
-        for i in range(number_samples):
-            if dict_ga[ga][0][0] <= lat_list[i] <= dict_ga[ga][0][1] and dict_ga[ga][1][0] <= lon_list[i] <= \
-                    dict_ga[ga][1][1]:
-                loss_sample = mse_loss(generated_var_list[i], measured_var_list[i])
-                list_loss_ga[index_ga].append(loss_sample)
-
-    sns.boxplot(data=list_loss_ga,
-                showfliers=False)
-    plt.xticks(range(len(list(dict_ga.keys()))), list(dict_ga.keys()))
-    plt.show()
-    plt.close()
-
-    return
-
-
-def seasonal_and_geographic_bp(variable, date_model, epoch_model, mode):
+def bp_season_ga(variable, date_model, epoch_model, mode):
     path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/fig/"
     if not os.path.exists(path_analysis):
         os.mkdir(path_analysis)
 
     dict_ga = {'NWM': [[40, 45], [-2, 9.5]],
                'SWM': [[32, 40], [-2, 9.5]],
-               'TIR': [[37, 45], [9.5, 16]],
+               'TYR': [[37, 45], [9.5, 16]],
                'ION': [[30, 37], [9.5, 22]],
                'LEV': [[30, 37], [22, 36]]}
 

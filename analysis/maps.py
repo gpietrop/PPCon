@@ -1,4 +1,4 @@
-from analysis_utils import *
+from utils_analysis import *
 
 
 def plot_ga_med(lat_values, lon_values, clusters, lat_limits_l=30, lat_limits_u=47, lon_limits_l=-3, lon_limits_u=37):

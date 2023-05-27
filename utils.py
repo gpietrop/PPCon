@@ -107,6 +107,7 @@ def upload_and_evaluate_model(dir_model, info_model, ep):
 
 def get_output(sample, model_day, model_year, model_lat, model_lon, model):
     year, day_rad, lat, lon, temp, psal, doxy, _, _, _ = sample
+    # year, day_rad, lat, lon, temp, psal, doxy = sample
 
     output_day = model_day(day_rad.unsqueeze(1))
     output_year = model_year(year.unsqueeze(1))
