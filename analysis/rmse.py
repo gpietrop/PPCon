@@ -48,8 +48,7 @@ def geographic_rmse(lat_limits, lon_limits, variable, date_model, epoch_model, m
     return my_loss, number_geographic_samples
 
 
-def seasonal_and_geographic_rmse(variable, date_model, epoch_model, mode):
-
+def seasonal_and_geographic_rmse(variable, date_model, epoch_model, mode, make_fig=False):
     font = {'family': 'normal',
             'weight': 'bold',
             'size': 22}
@@ -90,21 +89,41 @@ def seasonal_and_geographic_rmse(variable, date_model, epoch_model, mode):
                         list_number_samples[index_s][index_ga] += 1
 
     list_loss = np.array(list_loss) / np.array(list_number_samples)
+
+    # for j in range(len(list(dict_ga.keys()))):
+    #     print(f"{list(dict_ga.keys())[j]} loss")
+    #     loss_s = 0
+    #     number_s = 0
+    #     for k in range(len(list(dict_season.keys()))):
+    #         loss_s += list_loss[j, k] * list_number_samples[j][k]
+    #         number_s += list_number_samples[j][k]
+    #     print(loss_s / number_s)
+
     for j in range(len(list(dict_season.keys()))):
-        print(f"{list(dict_season.keys())[j]} losses: \t number samples")
+        print(f"{list(dict_season.keys())[j]} loss")
+        loss_s = 0
+        number_s = 0
         for k in range(len(list(dict_ga.keys()))):
-            print(f"{list(dict_ga.keys())[k]} : {list_loss[j, k]} \t {list_number_samples[j][k]}")
+            loss_s += list_loss[j, k] * list_number_samples[j][k]
+            number_s += list_number_samples[j][k]
+        print(loss_s / number_s)
 
-    for k in range(len(dict_season.keys())):
-        season = list(dict_season.keys())[k]
-        plt.bar(x=range(len(dict_color.keys())), height=list_number_samples[k], color=dict_color.values())
-        plt.xticks(range(len(dict_color.keys())), dict_color.keys())
-        plt.ylim([0, 275])
-        plt.title(f"{season} train data distribution -- {variable}")
-        plt.xlabel("geographical area")
-        plt.ylabel("number of samples")
+    # for j in range(len(list(dict_season.keys()))):
+    # print(f"{list(dict_season.keys())[j]} losses: \t number samples")
+    # for k in range(len(list(dict_ga.keys()))):
+    # print(f"{list(dict_ga.keys())[k]} : {list_loss[j, k]} \t {list_number_samples[j][k]}")
 
-        plt.savefig(f"{path_analysis}hist_{variable}_{mode}_{season}_{epoch_model}.png")
-        plt.close()
+    if make_fig:
+        for k in range(len(dict_season.keys())):
+            season = list(dict_season.keys())[k]
+            plt.bar(x=range(len(dict_color.keys())), height=list_number_samples[k], color=dict_color.values())
+            plt.xticks(range(len(dict_color.keys())), dict_color.keys())
+            plt.ylim([0, 275])
+            plt.title(f"{season} train data distribution -- {variable}")
+            plt.xlabel("geographical area")
+            plt.ylabel("number of samples")
+
+            plt.savefig(f"{path_analysis}hist_{variable}_{mode}_{season}_{epoch_model}.png")
+            plt.close()
 
     return

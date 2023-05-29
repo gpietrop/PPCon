@@ -19,15 +19,15 @@ dict_unit_measure = {"NITRATE": r"$\frac{mmol}{m^3}$",
                      "CHLA": r"$\frac{mg}{m^3}$",
                      "BBP700": r"$\frac{1}{m}$"}
 
-pal = sns.color_palette("magma")
+# dir_list = os.listdir(f"/Users/admin/Desktop/ppcon/ds/SUPERFLOAT_PPCon/")
+dir_path = os.getcwd() + f"/../ds/SUPERFLOAT_PPCon/"
+dir_list = os.listdir(dir_path)
 
-dir_list = os.listdir(f"/Users/admin/Desktop/ppcon/ds/SUPERFLOAT_PPCon/")
-for var in ["NITRATE", "CHLA", "BBP700"]:
+for var in ["CHLA", "BBP700"]:
     for folder_name in dir_list:  # ["6901773"]:
         if folder_name[0] == "F" or folder_name[0] == ".":
             continue
-
-        folder_path = f"/Users/admin/Desktop/ppcon/ds/SUPERFLOAT_PPCon/{folder_name}"
+        folder_path = dir_path + folder_name
 
         # get ordere list of measurements
         files = os.listdir(folder_path)
@@ -159,10 +159,12 @@ for var in ["NITRATE", "CHLA", "BBP700"]:
         cbar_ax = fig.add_axes([0.88, 0.15, 0.025, 0.7])
         cb = fig.colorbar(im1,  cax=cbar_ax, label=f"{var} [{dict_unit_measure[var]}]", shrink=0.1) #
 
-        cb_ticks = [float(cb.ax.get_yticklabels()[el].get_text()) for el in range(len(cb.ax.get_yticklabels()))]
-        cb.ax.set_yticklabels(['{:,.0e}'.format(x) for x in cb_ticks], fontsize=8)
+        if var == "BBP700":
+            cb_ticks = [float(cb.ax.get_yticklabels()[el].get_text()) for el in range(len(cb.ax.get_yticklabels()))]
+            cb.ax.set_yticklabels(['{:,.0e}'.format(x) for x in cb_ticks], fontsize=8)
 
-        plt.savefig(f"/Users/admin/Desktop/ppcon/results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png")
+        # plt.savefig(f"/Users/admin/Desktop/ppcon/results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png")
+        plt.savefig(os.getcwd() + f"/../results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png")
 
         # plt.show()
         plt.close()

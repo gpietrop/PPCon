@@ -2,6 +2,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
 from utils_analysis import *
+import matplotlib
 
 dict_ga = {'NWM': [[40, 45], [-2, 9.5]],
            'SWM': [[32, 40], [-2, 9.5]],
@@ -92,11 +93,12 @@ def seasonal_and_geographic_rmse(variable, date_model, epoch_model, mode):
 
 def make_dim_scatter(a_list, variable):
     if variable == "NITRATE":
-        list_scatter_dim = [25 if loss < 0.3 else 150 if 0.3 < loss < 0.6 else 500 for loss in a_list]
+        list_scatter_dim = [75 if loss < 0.3 else 250 if 0.3 < loss < 0.6 else 650 for loss in a_list]
     if variable == "CHLA":
         list_scatter_dim = [25 if loss < 0.01 else 150 if 0.01 < loss < 0.05 else 500 for loss in a_list]
     if variable == "BBP700":
-        list_scatter_dim = [25 if loss < 0.00000005 else 150 if 0.00000005 < loss < 0.00000015 else 500 for loss in a_list]
+        list_scatter_dim = [25 if loss < 0.00000005 else 150 if 0.00000005 < loss < 0.00000015 else 500 for loss in
+                            a_list]
 
     return list_scatter_dim
 
@@ -123,7 +125,6 @@ def plot_scatter(variable, date_model, epoch_model, mode):
                c=list(dict_color.values()), marker="D", label="autumn", alpha=0.6)  # autumn
 
     # legend 1 -- MAE dimension
-    # handles, labels = scatter1.legend_elements(prop="sizes", alpha=0.6)
     legend_elements = [Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markersize=8),
                        Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markersize=13),
                        Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markersize=18)
@@ -141,7 +142,6 @@ def plot_scatter(variable, date_model, epoch_model, mode):
         un_meas = dict_unit_measure["BBP700"]
         lg1 = ax.legend(legend_elements, ["MAE<0.5e-8", "0.5e-8<MAE<1.5e-8", "MAE>1.5e-8"],
                         bbox_to_anchor=(1.0, 1.0), loc="upper left", title=f"MAE [{un_meas}]")
-
 
     # legend 2 -- season
     handles, labels = ax.get_legend_handles_labels()
@@ -171,6 +171,71 @@ def plot_scatter(variable, date_model, epoch_model, mode):
 
     plt.savefig(f"{path_analysis}scatter_{mode}_{epoch_model}.png")
     # plt.show()
+    plt.close()
+
+    return
+
+
+def plot_scatter_paper(variable, date_model, epoch_model, mode):
+
+    path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/fig/"
+    if not os.path.exists(path_analysis):
+        os.mkdir(path_analysis)
+
+    pal = sns.color_palette("muted")
+    dict_color = {'NWM': pal[0], 'SWM': pal[1], 'TYR': pal[2], 'ION': pal[3], 'LEV': pal[4]}
+
+    fig, ax = plt.subplots()
+    # fig = plt.figure(figsize=(8, 5))
+
+    list_loss, list_number_samples = seasonal_and_geographic_rmse(variable, date_model, epoch_model, "train")
+    list_std = seasonal_and_geographic_std(variable, date_model, epoch_model, "train")
+
+    ax.scatter(list_std[0], list_number_samples[0], s=make_dim_scatter(list_loss[0], variable),
+               c=list(dict_color.values()), marker="^", label="winter", alpha=0.6)  # winter
+    ax.scatter(list_std[1], list_number_samples[1], s=make_dim_scatter(list_loss[1], variable),
+               c=list(dict_color.values()), marker="s", label="spring", alpha=0.6)  # spring
+    ax.scatter(list_std[2], list_number_samples[2], s=make_dim_scatter(list_loss[2], variable),
+               c=list(dict_color.values()), marker="o", label="summer", alpha=0.6)  # summer
+    ax.scatter(list_std[3], list_number_samples[3], s=make_dim_scatter(list_loss[3], variable),
+               c=list(dict_color.values()), marker="D", label="autumn", alpha=0.6)  # autumn
+
+    # legend 1 -- MAE dimension
+    # handles, labels = scatter1.legend_elements(prop="sizes", alpha=0.6)
+    legend_elements = [Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markersize=6),
+                       Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markersize=11),
+                       Line2D([0], [0], marker='o', color='w', markerfacecolor='gray', markersize=16)
+                       ]
+
+    if variable == "NITRATE":
+        un_meas = dict_unit_measure["NITRATE"]
+        lg1 = ax.legend(legend_elements, ["MSE<" + r"$0.3$", r"$0.3<$" + "MSE" + r"$<0.6$", "MSE" + r"$>0.6$"],
+                        fontsize="10", title=f"MSE [{un_meas}]")
+    if variable == "CHLA":
+        un_meas = dict_unit_measure["CHLA"]
+        lg1 = ax.legend(legend_elements, ["MSE<" + r"$0.01$", r"$0.01<$" + "MSE" + r"$<0.05$", "MSE" + r"$>0.05$"],
+                        fontsize="10", title=f"MSE [{un_meas}]")
+    if variable == "BBP700":
+        un_meas = dict_unit_measure["BBP700"]
+        lg1 = ax.legend(legend_elements, ["MSE<" + r"$0.5e^{-8}$", r"$0.5e^{-8}<$" + "MSE" + r"$<1.5e^{-8}$",
+                                          "MSE" + r"$>1.5e^{-8}$"],
+                        fontsize="10", title=f"MSE [{un_meas}]")
+
+    # ax.xaxis.set_major_formatter(FormatStrFormatter('% 1.2f'))
+    if variable == "BBP700":
+        ax.xaxis.set_major_formatter(matplotlib.ticker.StrMethodFormatter('{x:,.0e}'))
+    plt.xlabel(f"standard deviation [{un_meas}]")
+    plt.ylabel("number of samples (training set)")
+
+    if variable == "CHLA":
+        plt.title("CHLOROPHYLL")
+    else:
+        plt.title(variable)
+
+    plt.tight_layout()
+
+    plt.savefig(f"{path_analysis}scatter_{mode}_{epoch_model}.png")
+    plt.show()
     plt.close()
 
     return
