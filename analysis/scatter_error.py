@@ -112,6 +112,9 @@ def plot_scatter(variable, date_model, epoch_model, mode):
     fig = plt.figure(figsize=(8, 5))
     ax = fig.add_axes([0.1, 0.1, 0.6, 0.75])
 
+    pal = sns.color_palette("muted")
+    dict_color = {'NWM': pal[0], 'SWM': pal[1], 'TYR': pal[2], 'ION': pal[3], 'LEV': pal[4]}
+
     list_loss, list_number_samples = seasonal_and_geographic_rmse(variable, date_model, epoch_model, "train")
     list_std = seasonal_and_geographic_std(variable, date_model, epoch_model, "train")
 
@@ -235,7 +238,9 @@ def plot_scatter_paper(variable, date_model, epoch_model, mode):
     plt.tight_layout()
 
     plt.savefig(f"{path_analysis}scatter_{mode}_{epoch_model}.png")
-    plt.show()
+    plt.savefig(os.getcwd() + f"/../results/paper_fig/scatter_{variable}_{mode}.png")
+
+    # plt.show()
     plt.close()
 
     return
