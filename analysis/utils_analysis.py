@@ -23,9 +23,13 @@ from other_methods.gloria import get_gloria_profile
 sns.set_theme(context='paper', style='whitegrid', font='sans-serif', font_scale=1.5,
               color_codes=True, rc=None)
 
-dict_unit_measure = {"NITRATE": r"$\frac{mmol}{m^3}$",
-                     "CHLA": r"$\frac{mg}{m^3}$",
-                     "BBP700": r"$\frac{1}{m}$"}
+dict_unit_measure = {"NITRATE": r"$mmol \ m^{-3}$",
+                     "CHLA": r"$mg \ m^{-3}$",
+                     "BBP700": r"$m^{-1}$"}
+
+dict_var_name = {"NITRATE": "Nitrate",
+                 "CHLA": "Chlorophyll",
+                 "BBP700": "BBP700"}
 
 pal = sns.color_palette("magma")
 

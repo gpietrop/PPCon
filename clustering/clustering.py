@@ -12,7 +12,7 @@ from utils_clustering import make_ds
 from dataset_clustering import FloatDataset
 from plot_clustering import plot_density_points, plot_adp_clustering, plot_clustering_coordinates
 
-make_ds("SUPERFLOAT")
+# make_ds("SUPERFLOAT")
 ds_enhanced_path = os.getcwd() + "/../ds/clustering/ds_sf_clustering_enhanced.csv"
 
 dataset = FloatDataset(ds_enhanced_path)
@@ -30,7 +30,6 @@ lat_values = []
 lon_values = []
 for year, day_rad, lat, lon, temp, psal, doxy, nitrate, chla, BBP700, name_float in toy_loader:
     #     chla = torch.squeeze(chla[:, 5:150]).numpy()
-    print(day_rad)
 
     lat_values.append(lat)
     lon_values.append(lon)
@@ -53,7 +52,6 @@ intrinsic_dim, _, intrinsic_dim_err = data.compute_id_2NN()
 
 # check the value of the intrinsic dimension found
 print(data.intrinsic_dim)
-
 
 # compute the density of all points using a simple kNN estimator
 log_den, log_den_err = data.compute_density_kNN(k=15)

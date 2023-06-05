@@ -26,8 +26,16 @@ def reconstruction_profiles(variable, date_model, epoch_model, mode):
                  color="#1F77B4", label=f"PPCon")
         plt.gca().invert_yaxis()
 
-        plt.xlabel(f"{variable} [{dict_unit_measure[variable]}]")
-        plt.ylabel(r"depth [$m$]")
+        plt.xlabel(f"{dict_var_name[variable]} [{dict_unit_measure[variable]}]")
+        plt.ylabel(r"Depth [$m$]")
+
+        if variable == "BBP700":
+            ax = plt.gca()
+            x_labels = ax.get_xticks()
+            ax.set_xticklabels(['{:,.0e}'.format(x) for x in x_labels])
+
+        plt.legend()
+        plt.tight_layout()
 
         plt.legend()
         plt.savefig(f"{path_analysis}profile_{round(lat, 2)}_{round(lon, 2)}.png")
