@@ -20,7 +20,7 @@ sns.set_theme(context='paper', style='white', font='sans-serif', font_scale=1.5,
 dir_path = os.getcwd() + f"/../ds/SUPERFLOAT_PPCon/"
 dir_list = os.listdir(dir_path)
 
-for var in ["NITRATE", "CHLA", "BBP700"]:
+for var in ["BBP700"]:
     for folder_name in dir_list:  # ["6901773"]:
         if folder_name[0] == "F" or folder_name[0] == ".":
             continue
@@ -35,7 +35,8 @@ for var in ["NITRATE", "CHLA", "BBP700"]:
         matrix_generated = np.zeros((200, len(files)))
 
         # for each of the measurements get the original measurements and the prediction
-        counter_discarded = 0
+        counter_discarded_measured = 0
+        counter_discarded_generated = 0
         flag_print = 0
         x_ticks = []  # date of sampling corresponding to the sampling value
         for index in range(len(files)):
@@ -58,37 +59,39 @@ for var in ["NITRATE", "CHLA", "BBP700"]:
 
                 if var == "CHLA":
                     if lon < 12:
-                        maxmax = 1
+                        maxmax = 0.75
                     else:
                         maxmax = 0.5
                     minmin = -0.02
                 if var == "BBP700":
-                    maxmax = 0.004
+                    maxmax = 0.002
                     minmin = 0.000
 
                 flag_print = 1
 
             if "DOXY" not in ds.variables.keys():
-                counter_discarded -= 1
+                # counter_discarded -= 1
                 matrix_measured[:, index] = -999 * np.array(200)
                 matrix_generated[:, index] = -999 * np.array(200)
                 continue
 
-            if var not in ds.variables.keys() or f"{var}_PPCON" not in ds.variables.keys() or len(
-                    ds[f"PRES_{var}"][:].data) == 200:
-                matrix_measured[:, index] = -999 * np.array(200)
+            if var not in ds.variables.keys() or f"{var}_PPCON" not in ds.variables.keys():
                 matrix_generated[:, index] = -999 * np.array(200)
-                counter_discarded -= 1
+                matrix_measured[:, index] = -999 * np.array(200)
                 continue
 
-            var_measured = ds[var][:].data
-            pres_var_measured = ds[f"PRES_{var}"][:].data
+            if len(ds[f"PRES_{var}"][:].data) == 200:
+                matrix_measured[:, index] = -999 * np.array(200)
+                counter_discarded_generated += 1
+            else:
+                var_measured = ds[var][:].data
+                pres_var_measured = ds[f"PRES_{var}"][:].data
 
-            var_measured_interpolated = discretize(pres_var_measured, var_measured, dict_max_pressure[var],
-                                                   dict_interval[var])
+                var_measured_interpolated = discretize(pres_var_measured, var_measured, dict_max_pressure[var],
+                                                       dict_interval[var])
 
-            # matrix_measured[:, index + counter_discarded] = var_measured_interpolated
-            matrix_measured[:, index] = var_measured_interpolated
+                # matrix_measured[:, index + counter_discarded] = var_measured_interpolated
+                matrix_measured[:, index] = var_measured_interpolated
 
             var_generated = ds[f"{var}_PPCON"][:].data
             pres_var_generated = ds[f"PRES_{var}_PPCON"][:].data
@@ -105,9 +108,9 @@ for var in ["NITRATE", "CHLA", "BBP700"]:
         # find minimum of minima & maximum of maxima
         try:
             if var == "NITRATE":
-                minmin = 0
+                minmin = -0.15
                 max = np.max([np.max(matrix_measured), np.max(matrix_generated), 0])
-                maxmax = np.min([8, max])
+                maxmax = np.min([8, max - 0.5])
         except Exception as error:
             continue
 
