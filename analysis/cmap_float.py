@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from discretization import *
+from analysis.utils_analysis import dict_unit_measure
 from make_ds.make_superfloat_ds import discretize
 
 # I need as input the folder which contains float measurements and then take all the float vector one after each other
@@ -15,15 +16,11 @@ from make_ds.make_superfloat_ds import discretize
 sns.set_theme(context='paper', style='white', font='sans-serif', font_scale=1.5,
               color_codes=True, rc=None)
 
-dict_unit_measure = {"NITRATE": r"$\frac{mmol}{m^3}$",
-                     "CHLA": r"$\frac{mg}{m^3}$",
-                     "BBP700": r"$\frac{1}{m}$"}
-
 # dir_list = os.listdir(f"/Users/admin/Desktop/ppcon/ds/SUPERFLOAT_PPCon/")
 dir_path = os.getcwd() + f"/../ds/SUPERFLOAT_PPCon/"
 dir_list = os.listdir(dir_path)
 
-for var in ["CHLA", "BBP700"]:
+for var in ["NITRATE", "CHLA", "BBP700"]:
     for folder_name in dir_list:  # ["6901773"]:
         if folder_name[0] == "F" or folder_name[0] == ".":
             continue
@@ -99,11 +96,6 @@ for var in ["CHLA", "BBP700"]:
             # matrix_generated[:, index + counter_discarded] = var_generated
             matrix_generated[:, index] = var_generated
 
-            # plt.plot(var_measured_interpolated, label="measured")
-            # plt.plot(var_generated)
-            # plt.legend()
-            # plt.show()
-
         # mae = mean_absolute_error(matrix_generated, matrix_measured)
         # print(mae)
 
@@ -150,7 +142,7 @@ for var in ["CHLA", "BBP700"]:
         axs[1].tick_params(axis='x', labelsize=10)
         axs[1].set_yticks(np.arange(0, 200)[::50], np.arange(0, dict_max_pressure[var], dict_interval[var])[::50])
         axs[1].set_ylabel(r"depth [$m$]")
-        axs[1].set_xlabel(r"date")
+        # axs[1].set_xlabel(r"date")
 
         fig.suptitle(f"{folder_name}")
         plt.tight_layout()
