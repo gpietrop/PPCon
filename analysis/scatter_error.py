@@ -179,6 +179,13 @@ def make_dim_scatter(a_list, variable):
     return list_scatter_dim
 
 
+def export_legend(legend, filename="legend.png"):
+    fig = legend.figure
+    fig.canvas.draw()
+    bbox = legend.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+    fig.savefig(os.getcwd() + f"/../results/paper_fig/{filename}.png", dpi="figure", bbox_inches=bbox)
+
+
 def plot_scatter_paper(variable, date_model, epoch_model, mode):
 
     path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/fig/"
@@ -228,16 +235,41 @@ def plot_scatter_paper(variable, date_model, epoch_model, mode):
     if variable == "NITRATE":
         un_meas = dict_unit_measure["NITRATE"]
         lg1 = ax.legend(legend_elements, ["MSE<" + r"$0.3$", r"$0.3<$" + "MSE" + r"$<0.6$", "MSE" + r"$>0.6$"],
-                        fontsize="10", title=f"MSE [{un_meas}]", loc="lower right")
+                        fontsize="8", title=f"MSE [{un_meas}]", loc="lower right")
     if variable == "CHLA":
         un_meas = dict_unit_measure["CHLA"]
         lg1 = ax.legend(legend_elements, ["MSE<" + r"$0.01$", r"$0.01<$" + "MSE" + r"$<0.05$", "MSE" + r"$>0.05$"],
-                        fontsize="10", title=f"MSE [{un_meas}]", loc="lower right")
+                        fontsize="8", title=f"MSE [{un_meas}]", loc="lower right")
     if variable == "BBP700":
         un_meas = dict_unit_measure["BBP700"]
         lg1 = ax.legend(legend_elements, ["MSE<" + r"$0.5e^{-8}$", r"$0.5e^{-8}<$" + "MSE" + r"$<1.5e^{-8}$",
                                           "MSE" + r"$>1.5e^{-8}$"],
-                        fontsize="10", title=f"MSE [{un_meas}]")
+                        fontsize="8", title=f"MSE [{un_meas}]", loc="lower right")
+
+    # legend 2 -- season
+    legend_elements2 = [
+        Patch(facecolor="white", hatch=3*patterns[0], edgecolor='k', label="Winter"),
+        Patch(facecolor="white", hatch=3*patterns[1], edgecolor='k', label="Spring"),
+        Patch(facecolor="white", hatch=3*patterns[2], edgecolor='k', label="Summer"),
+        Patch(facecolor="white", hatch=3*patterns[3], edgecolor='k', label="Autumn"),
+    ]
+    # lg2 = ax.legend(handles=legend_elements2, bbox_to_anchor=(1.0, 0.35), loc="upper left", title="Season")
+
+    # legend 3 -- ga
+    legend_elements3 = [
+            Patch(facecolor=list(dict_color_blue.values())[0], edgecolor='k', label=list(dict_color_blue.keys())[0]),
+            Patch(facecolor=list(dict_color_blue.values())[1], edgecolor='k', label=list(dict_color_blue.keys())[1]),
+            Patch(facecolor=list(dict_color_blue.values())[2], edgecolor='k', label=list(dict_color_blue.keys())[2]),
+            Patch(facecolor=list(dict_color_blue.values())[3], edgecolor='k', label=list(dict_color_blue.keys())[3]),
+            Patch(facecolor=list(dict_color_blue.values())[4], edgecolor='k', label=list(dict_color_blue.keys())[4]),
+            ]
+    # lg3 = ax.legend(handles=legend_elements3, bbox_to_anchor=(1.0, 0.35), loc="upper left", title="Geographic Area")
+
+    ax.add_artist(lg1)
+    # ax.add_artist(lg2)
+    # export_legend(lg2, "legend2")
+    # ax.add_artist(lg3)
+    # export_legend(lg3, "legend3")
 
     # ax.xaxis.set_major_formatter(FormatStrFormatter('% 1.2f'))
     if variable == "BBP700" or variable == "CHLA":
