@@ -1,7 +1,7 @@
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
-from utils_analysis import *
+from analysis.utils_analysis import *
 import matplotlib
 
 dict_ga = {'NWM': [[40, 45], [-2, 9.5]],
@@ -91,18 +91,6 @@ def seasonal_and_geographic_rmse(variable, date_model, epoch_model, mode):
     return list_loss, list_number_samples
 
 
-def make_dim_scatter(a_list, variable):
-    if variable == "NITRATE":
-        list_scatter_dim = [75 if loss < 0.3 else 250 if 0.3 < loss < 0.6 else 650 for loss in a_list]
-    if variable == "CHLA":
-        list_scatter_dim = [25 if loss < 0.01 else 150 if 0.01 < loss < 0.05 else 500 for loss in a_list]
-    if variable == "BBP700":
-        list_scatter_dim = [25 if loss < 0.00000005 else 150 if 0.00000005 < loss < 0.00000015 else 500 for loss in
-                            a_list]
-
-    return list_scatter_dim
-
-
 def plot_scatter(variable, date_model, epoch_model, mode):
     path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/fig/"
     if not os.path.exists(path_analysis):
@@ -179,14 +167,27 @@ def plot_scatter(variable, date_model, epoch_model, mode):
     return
 
 
+def make_dim_scatter(a_list, variable):
+    if variable == "NITRATE":
+        list_scatter_dim = [150 if loss < 0.3 else 400 if 0.3 < loss < 0.6 else 800 for loss in a_list]
+    if variable == "CHLA":
+        list_scatter_dim = [150 if loss < 0.01 else 400 if 0.01 < loss < 0.05 else 800 for loss in a_list]
+    if variable == "BBP700":
+        list_scatter_dim = [150 if loss < 0.00000005 else 400 if 0.00000005 < loss < 0.00000015 else 800 for loss in
+                            a_list]
+
+    return list_scatter_dim
+
+
 def plot_scatter_paper(variable, date_model, epoch_model, mode):
 
     path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/fig/"
     if not os.path.exists(path_analysis):
         os.mkdir(path_analysis)
 
-    pal = sns.color_palette("muted")
-    dict_color = {'NWM': pal[0], 'SWM': pal[1], 'TYR': pal[2], 'ION': pal[3], 'LEV': pal[4]}
+    palette = ["#ffffcc", "#a1dab4", "gray", "#2c7fb8", "#253494"]
+    palette = [matplotlib.colors.to_rgb(c) for c in palette]
+    dict_color_blue = {'NWM': palette[0], 'SWM': palette[1], 'TYR': palette[2], 'ION': palette[3], 'LEV': palette[4]}
 
     fig, ax = plt.subplots()
     # fig = plt.figure(figsize=(8, 5))
@@ -194,14 +195,28 @@ def plot_scatter_paper(variable, date_model, epoch_model, mode):
     list_loss, list_number_samples = seasonal_and_geographic_rmse(variable, date_model, epoch_model, "train")
     list_std = seasonal_and_geographic_std(variable, date_model, epoch_model, "train")
 
-    ax.scatter(list_std[0], list_number_samples[0], s=make_dim_scatter(list_loss[0], variable),
-               c=list(dict_color.values()), marker="^", label="winter", alpha=0.6)  # winter
-    ax.scatter(list_std[1], list_number_samples[1], s=make_dim_scatter(list_loss[1], variable),
-               c=list(dict_color.values()), marker="s", label="spring", alpha=0.6)  # spring
-    ax.scatter(list_std[2], list_number_samples[2], s=make_dim_scatter(list_loss[2], variable),
-               c=list(dict_color.values()), marker="o", label="summer", alpha=0.6)  # summer
-    ax.scatter(list_std[3], list_number_samples[3], s=make_dim_scatter(list_loss[3], variable),
-               c=list(dict_color.values()), marker="D", label="autumn", alpha=0.6)  # autumn
+    patterns = ('-', '.', 'o', '+')
+
+    ax.scatter(list_std[0], list_number_samples[0],
+               s=make_dim_scatter(list_loss[0], variable),
+               edgecolor='black', linewidth=1,
+               facecolor=[list(dict_color_blue.values())[i] + (0.45,) for i in range(len(list(dict_color_blue.values())))],
+               marker="o", label="winter", hatch=3*patterns[0])  # winter
+    ax.scatter(list_std[1], list_number_samples[1],
+               s=make_dim_scatter(list_loss[1], variable),
+               edgecolor='black', linewidth=1,
+               facecolor=[list(dict_color_blue.values())[i] + (0.45,) for i in range(len(list(dict_color_blue.values())))],
+               marker="o", label="spring", hatch=3*patterns[1])  # spring
+    ax.scatter(list_std[2], list_number_samples[2],
+               s=make_dim_scatter(list_loss[2], variable),
+               edgecolor='black', linewidth=1,
+               facecolor=[list(dict_color_blue.values())[i] + (0.45,) for i in range(len(list(dict_color_blue.values())))],
+               marker="o", label="summer", hatch=3*patterns[2])  # summer
+    ax.scatter(list_std[3], list_number_samples[3],
+               s=make_dim_scatter(list_loss[3], variable),
+               edgecolor='black', linewidth=1,
+               facecolor=[list(dict_color_blue.values())[i] + (0.45,) for i in range(len(list(dict_color_blue.values())))],
+               marker="o", label="autumn", hatch=3*patterns[3])  # autumn
 
     # legend 1 -- MAE dimension
     # handles, labels = scatter1.legend_elements(prop="sizes", alpha=0.6)
@@ -213,11 +228,11 @@ def plot_scatter_paper(variable, date_model, epoch_model, mode):
     if variable == "NITRATE":
         un_meas = dict_unit_measure["NITRATE"]
         lg1 = ax.legend(legend_elements, ["MSE<" + r"$0.3$", r"$0.3<$" + "MSE" + r"$<0.6$", "MSE" + r"$>0.6$"],
-                        fontsize="10", title=f"MSE [{un_meas}]")
+                        fontsize="10", title=f"MSE [{un_meas}]", loc="lower right")
     if variable == "CHLA":
         un_meas = dict_unit_measure["CHLA"]
         lg1 = ax.legend(legend_elements, ["MSE<" + r"$0.01$", r"$0.01<$" + "MSE" + r"$<0.05$", "MSE" + r"$>0.05$"],
-                        fontsize="10", title=f"MSE [{un_meas}]")
+                        fontsize="10", title=f"MSE [{un_meas}]", loc="lower right")
     if variable == "BBP700":
         un_meas = dict_unit_measure["BBP700"]
         lg1 = ax.legend(legend_elements, ["MSE<" + r"$0.5e^{-8}$", r"$0.5e^{-8}<$" + "MSE" + r"$<1.5e^{-8}$",
@@ -225,15 +240,12 @@ def plot_scatter_paper(variable, date_model, epoch_model, mode):
                         fontsize="10", title=f"MSE [{un_meas}]")
 
     # ax.xaxis.set_major_formatter(FormatStrFormatter('% 1.2f'))
-    if variable == "BBP700":
+    if variable == "BBP700" or variable == "CHLA":
         ax.xaxis.set_major_formatter(matplotlib.ticker.StrMethodFormatter('{x:,.0e}'))
-    plt.xlabel(f"standard deviation [{un_meas}]")
-    plt.ylabel("number of samples (training set)")
+    plt.xlabel(f"Standard deviation [{un_meas}]")
+    plt.ylabel("Training samples")
 
-    if variable == "CHLA":
-        plt.title("CHLOROPHYLL")
-    else:
-        plt.title(variable)
+    plt.title(dict_var_name[variable])
 
     plt.tight_layout()
 
