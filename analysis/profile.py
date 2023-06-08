@@ -47,7 +47,7 @@ def profile_season_ga(variable, date_model, epoch_model, mode):
     lat_list, lon_list, day_rad_list, generated_var_list, measured_var_list = get_reconstruction(variable, date_model,
                                                                                                  epoch_model, mode)
 
-    fig, axs = plt.subplots(2, 2)
+    fig, axs = plt.subplots(2, 2, figsize=(7, 7))
 
     for ga in list(dict_ga.keys()):
         generated, measured = get_profile_list_season_ga("W", ga, lat_list, lon_list, day_rad_list, generated_var_list,
@@ -85,13 +85,13 @@ def profile_season_ga(variable, date_model, epoch_model, mode):
                        label=ga, linestyle="solid", color=dict_color[ga])
         axs[1, 1].invert_yaxis()
 
-    axs[0, 0].set_title(list(dict_season.keys())[0])
-    axs[0, 1].set_title(list(dict_season.keys())[1])
-    axs[1, 0].set_title(list(dict_season.keys())[2])
-    axs[1, 1].set_title(list(dict_season.keys())[3])
+    axs[0, 0].set_title("Winter")
+    axs[0, 1].set_title("Spring")
+    axs[1, 0].set_title("Summer")
+    axs[1, 1].set_title("Autumn")
 
     for ax in axs.flat:
-        ax.set(xlabel=f"{variable} ({dict_unit_measure[variable]})", ylabel=r"depth [$m$]")
+        ax.set(xlabel=f"{dict_var_name[variable]} ({dict_unit_measure[variable]})", ylabel=r"Depth [$m$]")
         if variable == "BBP700":
             ax.xaxis.set_major_formatter(matplotlib.ticker.StrMethodFormatter('{x:,.0e}'))
         # ax.set_xticks(range(1, len(list(dict_ga.keys())) + 1), list(dict_ga.keys()))
@@ -100,9 +100,11 @@ def profile_season_ga(variable, date_model, epoch_model, mode):
     for ax in axs.flat:
         ax.label_outer()
 
-    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize="5")
+    # plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize="5")
+    plt.tight_layout()
 
     plt.savefig(f"{path_analysis}profile_comparison_{mode}_{epoch_model}.png")
+    plt.savefig(os.getcwd() + f"/../results/paper_fig/profile_comparison_{variable}_{mode}.png", dpi=1200)
 
     # plt.show()
     plt.close()

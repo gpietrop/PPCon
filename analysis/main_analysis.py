@@ -1,4 +1,4 @@
-# from analysis.profile import *
+from analysis.profile import profile_season_ga
 # from analysis.bp import seasonal_and_geographic_bp
 # from analysis.rmse import *
 from analysis.scatter_error import plot_scatter_paper
