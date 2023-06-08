@@ -26,7 +26,7 @@ def seasonal_rmse(season, variable, date_model, epoch_model, mode):
         day_sample = from_day_rad_to_day(day_rad=day_rad_list[index_sample])
         if dict_season[season][0] <= day_sample <= dict_season[season][1]:
             number_seasonal_samples += 1
-            loss_sample = mse_loss(generated_var_list[index_sample], measured_var_list[index_sample])
+            loss_sample = np.sqrt(mse_loss(generated_var_list[index_sample], measured_var_list[index_sample]))
             my_loss += loss_sample
     my_loss = my_loss / number_seasonal_samples
     return my_loss, number_seasonal_samples
@@ -83,7 +83,7 @@ def seasonal_and_geographic_rmse(variable, date_model, epoch_model, mode, make_f
                 if dict_season[season][0] <= day_sample <= dict_season[season][1]:
                     if dict_ga[ga][0][0] <= lat_list[i] <= dict_ga[ga][0][1] and dict_ga[ga][1][0] <= lon_list[i] <= \
                             dict_ga[ga][1][1]:
-                        loss_sample = mse_loss(generated_var_list[i], measured_var_list[i])
+                        loss_sample = np.sqrt(mse_loss(generated_var_list[i], measured_var_list[i]))
                         # print(list_loss)
                         list_loss[index_s][index_ga] += loss_sample
                         list_number_samples[index_s][index_ga] += 1
@@ -99,13 +99,22 @@ def seasonal_and_geographic_rmse(variable, date_model, epoch_model, mode, make_f
     #         number_s += list_number_samples[j][k]
     #     print(loss_s / number_s)
 
-    for j in range(len(list(dict_season.keys()))):
-        print(f"{list(dict_season.keys())[j]} loss")
+    # for j in range(len(list(dict_season.keys()))):
+    #    print(f"{list(dict_season.keys())[j]} loss")
+    #    loss_s = 0
+    #    number_s = 0
+    #    for k in range(len(list(dict_ga.keys()))):
+    #        loss_s += list_loss[j, k] * list_number_samples[j][k]
+    #        number_s += list_number_samples[j][k]
+    #    print(loss_s / number_s)
+
+    for j in range(len(list(dict_ga.keys()))):
+        print(f"{list(dict_ga.keys())[j]} loss")
         loss_s = 0
         number_s = 0
-        for k in range(len(list(dict_ga.keys()))):
-            loss_s += list_loss[j, k] * list_number_samples[j][k]
-            number_s += list_number_samples[j][k]
+        for k in range(len(list(dict_season.keys()))):
+            loss_s += list_loss[k, j] * list_number_samples[k][j]
+            number_s += list_number_samples[k][j]
         print(loss_s / number_s)
 
     # for j in range(len(list(dict_season.keys()))):

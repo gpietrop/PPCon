@@ -21,7 +21,7 @@ dir_path = os.getcwd() + f"/../ds/SUPERFLOAT_PPCon/"
 dir_list = os.listdir(dir_path)
 
 for var in ["BBP700"]:
-    for folder_name in dir_list:  # ["6901773"]:
+    for folder_name in ["6900807"]:  # : dir_list
         if folder_name[0] == "F" or folder_name[0] == ".":
             continue
         folder_path = dir_path + folder_name
@@ -64,7 +64,7 @@ for var in ["BBP700"]:
                         maxmax = 0.5
                     minmin = -0.02
                 if var == "BBP700":
-                    maxmax = 0.002
+                    maxmax = 0.004
                     minmin = 0.000
 
                 flag_print = 1
@@ -159,7 +159,7 @@ for var in ["BBP700"]:
             cb.ax.set_yticklabels(['{:,.0e}'.format(x) for x in cb_ticks], fontsize=8)
 
         # plt.savefig(f"/Users/admin/Desktop/ppcon/results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png")
-        plt.savefig(os.getcwd() + f"/../results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png")
+        plt.savefig(os.getcwd() + f"/../results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png", dpi=1200)
 
         # plt.show()
         plt.close()

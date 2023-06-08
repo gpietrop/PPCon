@@ -38,7 +38,7 @@ def reconstruction_profiles(variable, date_model, epoch_model, mode):
         plt.tight_layout()
 
         plt.legend()
-        plt.savefig(f"{path_analysis}profile_{round(lat, 2)}_{round(lon, 2)}.png")
+        plt.savefig(f"{path_analysis}profile_{round(lat, 2)}_{round(lon, 2)}.png", dpi=1200)
         plt.close()
 
     return
@@ -136,7 +136,9 @@ def reconstruction_profile_MLP(variable, season, date_model, epoch_model, mode):
         plt.ylabel(r"depth [$m$]")
 
         plt.legend()
-        plt.savefig(f"{path_analysis}/method_comparison_{round(lat.item(), 2)}_{round(lon.item(), 2)}.png")
+        plt.tight_layout()
+
+        plt.savefig(f"{path_analysis}/method_comparison_{round(lat.item(), 2)}_{round(lon.item(), 2)}.png", dpi=1200)
         plt.close()
 
     return
