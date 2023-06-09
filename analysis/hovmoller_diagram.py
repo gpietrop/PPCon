@@ -6,6 +6,7 @@ import netCDF4 as nc
 import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.metrics import mean_squared_error
 
 from discretization import *
 from analysis.utils_analysis import dict_unit_measure
@@ -20,8 +21,8 @@ sns.set_theme(context='paper', style='white', font='sans-serif', font_scale=1.5,
 dir_path = os.getcwd() + f"/../ds/SUPERFLOAT_PPCon/"
 dir_list = os.listdir(dir_path)
 
-for var in ["BBP700"]:
-    for folder_name in ["6900807"]:  # : dir_list
+for var in ["NITRATE"]:
+    for folder_name in ["6901648"]:  # : dir_list
         if folder_name[0] == "F" or folder_name[0] == ".":
             continue
         folder_path = dir_path + folder_name
@@ -99,8 +100,8 @@ for var in ["BBP700"]:
             # matrix_generated[:, index + counter_discarded] = var_generated
             matrix_generated[:, index] = var_generated
 
-        # mae = mean_absolute_error(matrix_generated, matrix_measured)
-        # print(mae)
+        mse = mean_squared_error(matrix_generated, matrix_measured)
+        print(np.sqrt(mse))
 
         # matrix_measured = matrix_measured[:, 1:counter_discarded]
         # matrix_generated = matrix_generated[:, 1:counter_discarded]
