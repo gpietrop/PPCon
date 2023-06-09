@@ -21,8 +21,8 @@ sns.set_theme(context='paper', style='white', font='sans-serif', font_scale=1.5,
 dir_path = os.getcwd() + f"/../ds/SUPERFLOAT_PPCon/"
 dir_list = os.listdir(dir_path)
 
-for var in ["NITRATE"]:
-    for folder_name in ["6901648"]:  # : dir_list
+for var in ["BBP700"]:
+    for folder_name in ["6900807"]:  # : dir_list
         if folder_name[0] == "F" or folder_name[0] == ".":
             continue
         folder_path = dir_path + folder_name
@@ -36,8 +36,7 @@ for var in ["NITRATE"]:
         matrix_generated = np.zeros((200, len(files)))
 
         # for each of the measurements get the original measurements and the prediction
-        counter_discarded_measured = 0
-        counter_discarded_generated = 0
+        index_discarded = []
         flag_print = 0
         x_ticks = []  # date of sampling corresponding to the sampling value
         for index in range(len(files)):
@@ -71,19 +70,22 @@ for var in ["NITRATE"]:
                 flag_print = 1
 
             if "DOXY" not in ds.variables.keys():
-                # counter_discarded -= 1
                 matrix_measured[:, index] = -999 * np.array(200)
                 matrix_generated[:, index] = -999 * np.array(200)
+                index_discarded.append(index)
                 continue
 
             if var not in ds.variables.keys() or f"{var}_PPCON" not in ds.variables.keys():
                 matrix_generated[:, index] = -999 * np.array(200)
                 matrix_measured[:, index] = -999 * np.array(200)
+                index_discarded.append(index)
                 continue
 
             if len(ds[f"PRES_{var}"][:].data) == 200:
                 matrix_measured[:, index] = -999 * np.array(200)
-                counter_discarded_generated += 1
+                matrix_generated[:, index] = -999 * np.array(200)
+
+                index_discarded.append(index)
             else:
                 var_measured = ds[var][:].data
                 pres_var_measured = ds[f"PRES_{var}"][:].data
@@ -91,20 +93,18 @@ for var in ["NITRATE"]:
                 var_measured_interpolated = discretize(pres_var_measured, var_measured, dict_max_pressure[var],
                                                        dict_interval[var])
 
-                # matrix_measured[:, index + counter_discarded] = var_measured_interpolated
                 matrix_measured[:, index] = var_measured_interpolated
 
-            var_generated = ds[f"{var}_PPCON"][:].data
-            pres_var_generated = ds[f"PRES_{var}_PPCON"][:].data
+                var_generated = ds[f"{var}_PPCON"][:].data
+                pres_var_generated = ds[f"PRES_{var}_PPCON"][:].data
 
-            # matrix_generated[:, index + counter_discarded] = var_generated
-            matrix_generated[:, index] = var_generated
+                matrix_generated[:, index] = var_generated
 
-        mse = mean_squared_error(matrix_generated, matrix_measured)
+        matrix_generated_full = np.delete(matrix_generated, index_discarded, axis=1)
+        matrix_measured_full = np.delete(matrix_measured, index_discarded, axis=1)
+
+        mse = mean_squared_error(matrix_generated_full, matrix_measured_full)
         print(np.sqrt(mse))
-
-        # matrix_measured = matrix_measured[:, 1:counter_discarded]
-        # matrix_generated = matrix_generated[:, 1:counter_discarded]
 
         # find minimum of minima & maximum of maxima
         try:
@@ -127,7 +127,7 @@ for var in ["NITRATE"]:
         cmap = matplotlib.cm.get_cmap('viridis').copy()
         cmap.set_under('white')
 
-        im1 = axs[0].imshow(matrix_measured, vmin=minmin, vmax=maxmax,
+        im1 = axs[0].imshow(matrix_measured_full, vmin=minmin, vmax=maxmax,
                             cmap=cmap,
                             aspect='auto')  # , interpolation="nearest")
         axs[0].set_title("Measured")
@@ -135,7 +135,7 @@ for var in ["NITRATE"]:
         axs[0].set_yticks(np.arange(0, 200)[::50], np.arange(0, dict_max_pressure[var], dict_interval[var])[::50])
         axs[0].set_ylabel(r"depth [$m$]")
 
-        im2 = axs[1].imshow(matrix_generated, vmin=minmin, vmax=maxmax,
+        im2 = axs[1].imshow(matrix_generated_full, vmin=minmin, vmax=maxmax,
                             cmap=cmap,
                             aspect='auto')  # , interpolation="bilinear")
         axs[1].set_title("PPCon prediction")
@@ -160,7 +160,7 @@ for var in ["NITRATE"]:
             cb.ax.set_yticklabels(['{:,.0e}'.format(x) for x in cb_ticks], fontsize=8)
 
         # plt.savefig(f"/Users/admin/Desktop/ppcon/results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png")
-        plt.savefig(os.getcwd() + f"/../results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png", dpi=1200)
+        # plt.savefig(os.getcwd() + f"/../results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png", dpi=1200)
 
-        # plt.show()
+        plt.show()
         plt.close()
