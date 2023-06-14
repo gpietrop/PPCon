@@ -16,13 +16,13 @@ dict_models = {
 # my_var = "NITRATE"
 # plot_med(my_var, dict_models[my_var][0], dict_models[my_var][1], "train")
 
-for var in ["CHLA"]:
+for var in ["NITRATE", "CHLA", "BBP700"]:
     date = dict_models[var][0]
     epoch = dict_models[var][1]
 
     # reconstruction_profile(var, date, epoch, "test")
-    seasonal_and_geographic_rmse(var, date, epoch, "test")
-    # plot_scatter_paper(var, date, epoch, "test")
+    # seasonal_and_geographic_rmse(var, date, epoch, "test")
+    plot_scatter_paper(var, date, epoch, "test")
 
 for var in ["NITRATE"]:
     date = dict_models[var][0]
