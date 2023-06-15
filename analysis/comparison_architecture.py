@@ -80,6 +80,8 @@ def reconstruction_profile_MLP(variable, season, date_model, epoch_model, mode):
 
     for sample in ds:
         year, day_rad, lat, lon, temp, psal, doxy, measured_var = sample
+        # if round(lat.item(), 2) not in [41.85, 39.11, 36.01]:
+        #     continue
         day_sample = from_day_rad_to_day(day_rad=day_rad)
         if season != "all" and not dict_season[season][0] <= day_sample <= dict_season[season][
             1] and random.random() < 0.2:
@@ -127,7 +129,7 @@ def reconstruction_profile_MLP(variable, season, date_model, epoch_model, mode):
         plt.plot(torch.squeeze(measured_var)[cut_sup:-cut_inf], depth[cut_sup:-cut_inf], lw=3, color="#2CA02C",
                  label="Measured")
         plt.plot(torch.squeeze(generated_gloria_var)[cut_sup:-cut_inf], depth[cut_sup:-cut_inf], lw=3,
-                 color="#BCBD22", linestyle=(0, (5, 1)), label="MLP")
+                 color="midnightblue", linestyle=(0, (5, 1)), label="MLP")
         plt.plot(torch.squeeze(generated_var)[cut_sup:-cut_inf], depth[cut_sup:-cut_inf], lw=3,
                  color="#1F77B4", linestyle=(0, (3, 1, 1, 1)), label="PPCon")
         plt.gca().invert_yaxis()
@@ -138,7 +140,7 @@ def reconstruction_profile_MLP(variable, season, date_model, epoch_model, mode):
         plt.legend()
         plt.tight_layout()
 
-        plt.savefig(f"{path_analysis}/method_comparison_{round(lat.item(), 2)}_{round(lon.item(), 2)}.png", dpi=1200)
+        plt.savefig(f"{path_analysis}/method_comparison_{round(lat.item(), 2)}_{round(lon.item(), 2)}.png", dpi=600)
         plt.close()
 
     return

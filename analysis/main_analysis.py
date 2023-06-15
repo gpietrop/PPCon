@@ -6,7 +6,7 @@ from analysis.comparison_architecture import *
 # from maps import *
 # from all_toghether import *
 
-# reconstruction_profile_MLP("NITRATE", "all", "2023-04-04_", 50, "test")
+reconstruction_profile_MLP("NITRATE", "all", "2023-04-04_", 50, "test")
 
 dict_models = {
     "NITRATE": ["2023-04-04_", 50],
@@ -22,7 +22,7 @@ for var in ["NITRATE", "CHLA", "BBP700"]:
 
     # reconstruction_profile(var, date, epoch, "test")
     # seasonal_and_geographic_rmse(var, date, epoch, "test")
-    plot_scatter_paper(var, date, epoch, "test")
+    # plot_scatter_paper(var, date, epoch, "test")
 
 for var in ["NITRATE"]:
     date = dict_models[var][0]
