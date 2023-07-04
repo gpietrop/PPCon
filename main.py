@@ -63,14 +63,6 @@ if training_folder == "SUPERFLOAT":
 train_dataset = FloatDataset(path_ds_train)
 val_dataset = FloatDataset(path_ds_test)
 
-# dataset = FloatDataset(path_ds)
-
-# train_frac = 0.8
-# train_size = int(train_frac * len(dataset))
-# val_size = len(dataset) - train_size
-
-# train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
-# print(val_dataset)
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
