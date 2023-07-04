@@ -38,6 +38,9 @@ where the inputs arguments stand for:
 *  `--batch_size` is the batch size for the training
 *  `--alpha_smooth_reg` set the multiplicative loss factor for the smooth regularization
 
+The dataset are already generated in a tensor form ready for the training, and splitted into train and test. 
+The dataset are contained in the _ds_ folder. 
+
 The codes that reproduce the plots of the paper are contained in the folder `analysis`:
 * To get __Figure 2-4__ the functions are contained in _analysis/comparison_architecture.py_
 * To get __Figure 5__ the functions are contained in _analysis/scatter_error.py_
