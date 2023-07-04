@@ -8,6 +8,7 @@ from dadapy.data import Data
 import matplotlib.pyplot as plt
 from dadapy.plot import plot_SLAn, plot_MDS, plot_matrix, get_dendrogram, plot_DecGraph
 
+from analysis.utils_analysis import from_day_rad_to_day
 from utils_clustering import make_ds
 from dataset_clustering import FloatDataset
 from plot_clustering import plot_density_points, plot_adp_clustering, plot_clustering_coordinates
@@ -18,7 +19,7 @@ ds_enhanced_path = os.getcwd() + "/../ds/clustering/ds_sf_clustering_enhanced.cs
 dataset = FloatDataset(ds_enhanced_path)
 ds = DataLoader(dataset, shuffle=True)
 
-test_frac = 0.05
+test_frac = 0.5
 test_size = int(test_frac * len(dataset))
 toy_dataset, _ = torch.utils.data.random_split(dataset, [test_size, len(dataset) - test_size])
 toy_loader = DataLoader(toy_dataset, shuffle=True)
@@ -29,13 +30,18 @@ ds_clustering = list()
 lat_values = []
 lon_values = []
 for year, day_rad, lat, lon, temp, psal, doxy, nitrate, chla, BBP700, name_float in toy_loader:
-    #     chla = torch.squeeze(chla[:, 5:150]).numpy()
+    season = "W"
+    dict_season = {'W': [0, 91], 'SP': [92, 182], 'SU': [183, 273], 'A': [274, 365]}
+    day_sample = from_day_rad_to_day(day_rad=day_rad)
 
-    lat_values.append(lat)
-    lon_values.append(lon)
+    if dict_season[season][0] <= day_sample <= dict_season[season][1]:
+        lat_values.append(lat)
+        lon_values.append(lon)
 
-    doxy = torch.squeeze(doxy).numpy()
-    ds_clustering.append(doxy)
+        nitrate = torch.squeeze(nitrate[:100:4]).numpy()
+        doxy = torch.squeeze(doxy[::4]).numpy()
+
+        ds_clustering.append(np.concatenate((doxy, nitrate)))
 
 ds_clustering = np.array(ds_clustering)
 # print(ds_clustering)
