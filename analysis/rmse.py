@@ -1,6 +1,6 @@
 import matplotlib
 
-from utils_analysis import *
+from analysis.utils_analysis import *
 
 
 def rmse(variable, date_model, epoch_model, mode):
@@ -9,7 +9,7 @@ def rmse(variable, date_model, epoch_model, mode):
     my_loss = 0
     number_samples = len(generated_var_list)
     for index_sample in range(number_samples):
-        loss_sample = mse_loss(generated_var_list[index_sample], measured_var_list[index_sample])
+        loss_sample = np.sqrt(mse_loss(generated_var_list[index_sample], measured_var_list[index_sample]))
         my_loss += loss_sample
     my_loss = my_loss / number_samples
     return my_loss

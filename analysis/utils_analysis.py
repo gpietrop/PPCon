@@ -16,8 +16,8 @@ from mpl_toolkits.basemap import Basemap
 from discretization import dict_max_pressure
 from dataset import FloatDataset
 from utils import upload_and_evaluate_model, from_day_rad_to_day
-from other_methods.suazade import get_suazade_profile
-from other_methods.gloria import get_gloria_profile
+# from other_methods.suazade import get_suazade_profile
+# from other_methods.gloria import get_gloria_profile
 
 
 sns.set_theme(context='paper', style='whitegrid', font='sans-serif', font_scale=1.5,

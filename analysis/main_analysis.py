@@ -1,8 +1,8 @@
-from analysis.profile import profile_season_ga
+# from analysis.profile import profile_season_ga
 # from analysis.bp import seasonal_and_geographic_bp
 from analysis.rmse import *
-from analysis.scatter_error import plot_scatter_paper, plot_scatter_paper_log
-from analysis.comparison_architecture import *
+# from analysis.scatter_error import plot_scatter_paper, plot_scatter_paper_log
+# from analysis.comparison_architecture import *
 # from maps import *
 # from all_toghether import *
 
@@ -20,9 +20,10 @@ for var in ["NITRATE"]:
     date = dict_models[var][0]
     epoch = dict_models[var][1]
 
+    print(rmse(var, date, epoch, "test"))
     # reconstruction_profile(var, date, epoch, "test")
     # seasonal_and_geographic_rmse(var, date, epoch, "test")
-    plot_scatter_paper(var, date, epoch, "test")
+    # plot_scatter_paper(var, date, epoch, "test")
     # plot_scatter_paper_log(var, date, epoch, "test")
 
 for var in ["NITRATE"]:
