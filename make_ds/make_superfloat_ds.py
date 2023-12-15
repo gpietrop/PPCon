@@ -56,6 +56,9 @@ def make_dict_single_float(path, date_time, variable):
 
     year, day_rad = read_date_time(date_time)
 
+    if year >= 2021:
+        return dict(), 0
+
     try:
         ds = nc.Dataset(path)  # Select sample
     except Exception as error:
