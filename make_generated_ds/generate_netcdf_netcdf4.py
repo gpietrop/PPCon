@@ -9,10 +9,8 @@ from torch.utils.data import DataLoader
 from discretization import *
 from make_ds.make_superfloat_ds import discretize
 from utils import upload_and_evaluate_model, get_output
-from dataset import FloatDataset as FloatDebug  # BUG!!!!!!!!!!11
-from dataset_with_float_names import FloatDataset  # BUG!!!!!!!!!!11
-
-import matplotlib.pyplot as plt
+from dataset import FloatDataset as FloatDebug
+from dataset_with_float_names import FloatDataset
 
 
 max_pres_nitrate = dict_max_pressure["NITRATE"]
@@ -68,12 +66,11 @@ qc = np.ones(200) * -9999
 
 for sample in my_ds:
     year, day_rad, lat, lon, temp, psal, doxy, nitrate, chla, BBP700, name_float = sample
-    # year, day_rad, lat, lon, temp, psal, doxy, chla = sample
     sample_prediction = sample[:-1]
 
     name_file = name_float[0]
     main_dir = name_float[0][2:-4]
-    # print(f"generating profiles {name_file}")
+    print(f"generating profiles {name_file}")
 
     # open the netcfd file in the "ds/SUP?>,ERFLOAT" directory
     path_superfloat = os.getcwd() + f"/../ds/SUPERFLOAT_PPCon/{main_dir}/{name_file}.nc"
@@ -104,7 +101,6 @@ for sample in my_ds:
     nitrate_ppcon = nitrate_ppcon.numpy()
 
     # check if the variable is contained in the ds - if not insert the variable generate also as "NITRATE"
-    # if torch.count_nonzero(nitrate) == 0:
     if "NITRATE" not in ds.variables.keys():
         ds.createDimension('nNITRATE', 200)
 
@@ -140,23 +136,11 @@ for sample in my_ds:
     sample_prediction[5] = psal_chla.unsqueeze(0)
     sample_prediction[6] = doxy_chla.unsqueeze(0)
 
-    # plt.plot(np.arange(0, 200, 1), temp.numpy(), label="measured")
-    # plt.plot(pres_temp_nc, temp_nc, label="generated")
-    # plt.legend()
-    # plt.show()
-    # plt.close()
-
     chla_ppcon = get_output(sample=sample_prediction, model_day=model_day_chla, model_year=model_year_chla,
                             model_lat=model_lat_chla, model_lon=model_lon_chla, model=model_chla)
     chla_ppcon = chla_ppcon.detach()
     chla_ppcon = torch.squeeze(chla_ppcon)
     chla_ppcon = chla_ppcon.numpy()
-
-    # plt.plot(chla.numpy()[0], label="measured")
-    # plt.plot(chla_ppcon, label="generated")
-    # plt.legend()
-    # plt.show()
-    # plt.close()
 
     if "CHLA" not in ds.variables.keys():
         ds.createDimension('nCHLA', 200)

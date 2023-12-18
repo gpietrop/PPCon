@@ -1,15 +1,14 @@
 import os
 import datetime
-import random
 
 import torch
 import numpy as np
-#import xarray as xr
 import pandas as pd
-#import seawater as sw
+import seawater as sw
+import scipy.ndimage
 
-#from other_methods.PreparationData import preparation_dataset, normalization_training
-#from other_methods.mlp import MLP
+from other_methods.PreparationData import preparation_dataset, normalization_training
+from other_methods.mlp import MLP
 from discretization import dict_max_pressure, dict_interval
 
 
@@ -49,8 +48,8 @@ def get_gloria_profile(year, day_rad, lat, lon, temperature, psalinity, doxygen,
         depth_unnormalized = sw.eos80.dpth(pres[k], lat)
         depth_u = depth_unnormalized / 20000 + (1 / ((1 + np.exp(-depth_unnormalized / 300)) ** 3))
 
-        pressure = sw.eos80.pres(depth_unnormalized, lat)
-        density = sw.eos80.dens(psal, temp, pres[k])
+        # pressure = sw.eos80.pres(depth_unnormalized, lat)
+        # density = sw.eos80.dens(psal, temp, pres[k])
 
         input_tensor = torch.tensor([time, lat, lon1, lon2, temp, doxy, psal, depth_u]).float()
 
@@ -92,5 +91,9 @@ def get_gloria_profile(year, day_rad, lat, lon, temperature, psalinity, doxygen,
 
         output = np.mean(outputs)
         output_gloria[k] = output
+
+    sigma = 2
+    # Apply the Gaussian filter
+    output_gloria = torch.from_numpy(scipy.ndimage.gaussian_filter1d(output_gloria, sigma))
 
     return output_gloria

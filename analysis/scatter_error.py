@@ -94,7 +94,7 @@ def seasonal_and_geographic_rmse(variable, date_model, epoch_model, mode):
 
 def make_dim_scatter(a_list, variable):
     if variable == "NITRATE":
-        list_scatter_dim = [150 if loss < 0.5 else 400 if 0.5 < loss < 0.7 else 800 for loss in a_list]
+        list_scatter_dim = [150 if loss < 0.4 else 400 if 0.4 < loss < 0.6 else 800 for loss in a_list]
     if variable == "CHLA":
         list_scatter_dim = [150 if loss < 0.055 else 400 if 0.055 < loss < 0.1 else 800 for loss in a_list]
     if variable == "BBP700":
@@ -160,7 +160,7 @@ def plot_scatter_paper(variable, date_model, epoch_model, mode):
 
     if variable == "NITRATE":
         un_meas = dict_unit_measure["NITRATE"]
-        lg1 = ax.legend(legend_elements, ["RMSE<" + r"$0.5$", r"$0.5<$" + "RMSE" + r"$<0.7$", "RMSE" + r"$>0.7$"],
+        lg1 = ax.legend(legend_elements, ["RMSE<" + r"$0.4$", r"$0.4<$" + "RMSE" + r"$<0.6$", "RMSE" + r"$>0.6$"],
                         fontsize="10", title=f"RMSE [{un_meas}]", loc="lower right")
     if variable == "CHLA":
         un_meas = dict_unit_measure["CHLA"]
@@ -205,7 +205,7 @@ def plot_scatter_paper(variable, date_model, epoch_model, mode):
     plt.tight_layout()
 
     plt.savefig(f"{path_analysis}scatter_{mode}_{epoch_model}.png")
-    plt.savefig(os.getcwd() + f"/../results/paper_fig/scatter_{variable}_{mode}.png", dpi=1200)
+    plt.savefig(os.getcwd() + f"/../results/paper_fig/scatter_{variable}_{mode}.png")  #, dpi=1200)
 
     # plt.show()
     plt.close()

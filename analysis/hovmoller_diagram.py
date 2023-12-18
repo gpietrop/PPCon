@@ -12,32 +12,26 @@ from discretization import *
 from analysis.utils_analysis import dict_unit_measure
 from make_ds.make_superfloat_ds import discretize
 
-# I need as input the folder which contains float measurements and then take all the float vector one after each other
-
 sns.set_theme(context='paper', style='white', font='sans-serif', font_scale=1.5,
               color_codes=True, rc=None)
 
-# dir_list = os.listdir(f"/Users/admin/Desktop/ppcon/ds/SUPERFLOAT_PPCon/")
 dir_path = os.getcwd() + f"/../ds/SUPERFLOAT_PPCon/"
 dir_list = os.listdir(dir_path)
 
 for var in ["NITRATE", "CHLA", "BBP700"]:
-    for folder_name in dir_list:  # : dir_list
+    for folder_name in dir_list:  #dir_list:  # : dir_list
         if folder_name[0] == "F" or folder_name[0] == ".":
             continue
         folder_path = dir_path + folder_name
 
-        # get ordere list of measurements
-        files = os.listdir(folder_path)
+        files = os.listdir(folder_path)  # get ordered list of measurements
         files.sort()
         print(files)
 
-        # initialize the matrix for the cmap function
-        matrix_measured = np.zeros((200, len(files)))
+        matrix_measured = np.zeros((200, len(files))) # initialize the matrix for the cmap function
         matrix_generated = np.zeros((200, len(files)))
 
-        # for each of the measurements get the original measurements and the prediction
-        index_discarded = []
+        index_discarded = [] # for each of the measurements get the original measurements and the prediction
         flag_print = 0
         x_ticks = []  # date of sampling corresponding to the sampling value
         for index in range(len(files)):
@@ -105,14 +99,24 @@ for var in ["NITRATE", "CHLA", "BBP700"]:
 
                 matrix_generated[:, index] = var_generated
 
+        try:  # find minimum of minima & maximum of maxima
+            sorted_indices = sorted(index_discarded, reverse=True)
+            for ind in sorted_indices:
+                x_ticks.pop(ind)
+        except Exception as error:
+            continue
+
+
         matrix_generated_full = np.delete(matrix_generated, index_discarded, axis=1)
         matrix_measured_full = np.delete(matrix_measured, index_discarded, axis=1)
+
+        matrix_generated_full[matrix_generated_full < 0] = 0
+        matrix_measured_full[matrix_measured_full < 0] = 0
 
         # mse = mean_squared_error(matrix_generated_full, matrix_measured_full)
         # print(np.sqrt(mse))
 
-        # find minimum of minima & maximum of maxima
-        try:
+        try:  # find minimum of minima & maximum of maxima
             if var == "NITRATE":
                 minmin = -0.15
                 max = np.max([np.max(matrix_measured), np.max(matrix_generated), 0])
@@ -126,7 +130,7 @@ for var in ["NITRATE", "CHLA", "BBP700"]:
         except Exception as error:
             continue
 
-        x_number_ticks = np.arange(0, index)
+        x_number_ticks = np.arange(0, len(x_ticks))
         fig, axs = plt.subplots(2, figsize=(8.8, 6))
 
         cmap = matplotlib.cm.get_cmap('viridis').copy()
@@ -151,7 +155,6 @@ for var in ["NITRATE", "CHLA", "BBP700"]:
         axs[1].tick_params(axis='x', labelsize=10)
         axs[1].set_yticks(np.arange(0, 200)[::50], np.arange(0, dict_max_pressure[var], dict_interval[var])[::50])
         axs[1].set_ylabel(r"depth [$m$]")
-        # axs[1].set_xlabel(r"date")
 
         fig.suptitle(f"{folder_name}")
         plt.tight_layout()
@@ -165,9 +168,9 @@ for var in ["NITRATE", "CHLA", "BBP700"]:
             cb.ax.set_yticklabels(['{:,.0e}'.format(x) for x in cb_ticks], fontsize=8)
 
         if not os.path.exists(os.getcwd() + f"/../results/hovm"):
-            os.mkdir(os.getcwd() + f"/../results/cmap")
+            os.mkdir(os.getcwd() + f"/../results/hovm")
         if not os.path.exists(os.getcwd() + f"/../results/hovm/{var}/"):
-            os.mkdir(os.getcwd() + f"/../results/cmap/{var}/")
-        plt.savefig(os.getcwd() + f"/../results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png", dpi=1200)
+            os.mkdir(os.getcwd() + f"/../results/hovm/{var}/")
+        plt.savefig(os.getcwd() + f"/../results/hovm/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png")  #, dpi=1200)
 
         plt.close()

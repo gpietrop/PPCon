@@ -1,3 +1,6 @@
+import os
+import scipy
+
 from utils_analysis import *
 
 
@@ -47,25 +50,20 @@ def reconstruction_profiles(variable, date_model, epoch_model, mode):
     return
 
 
-def reconstruction_profile_MLP(variable, season, date_model, epoch_model, mode):
-    # Create savedir
-    path_analysis = os.getcwd() + f"/../results/NITRATE/{date_model}/fig/comp_presentation"
+def reconstruction_profile_MLP(variable, date_model, epoch_model, mode):
+    path_analysis = os.getcwd() + f"/../results/NITRATE/{date_model}/fig/comparison-def"
     if not os.path.exists(path_analysis):
         os.mkdir(path_analysis)
-    # Upload the input ds
 
-    dict_season = {'W': [0, 91], 'SP': [92, 182], 'SU': [183, 273], 'A': [274, 365]}
-
-    path_float = f"/home/gpietropolli/Desktop/canyon-float/ds/NITRATE/float_ds_sf_{mode}.csv"
+    path_float = os.getcwd() + f"/../ds/NITRATE/float_ds_sf_{mode}.csv"
     if mode == "all":
-        path_float = f"/home/gpietropolli/Desktop/canyon-float/ds/NITRATE/float_ds_sf.csv"
+        path_float = os.getcwd() + f"/../ds/NITRATE/float_ds_sf.csv"
     dataset = FloatDataset(path_float)
     ds = DataLoader(dataset, shuffle=True)
 
     dir_model = os.getcwd() + f"/../results/NITRATE/{date_model}/model"
     info = pd.read_csv(os.getcwd() + f"/../results/NITRATE/{date_model}/info.csv")
 
-    # Upload and evaluate the model
     model_day, model_year, model_lat, model_lon, model = upload_and_evaluate_model(dir_model=dir_model, info_model=info,
                                                                                    ep=epoch_model)
 
@@ -75,26 +73,37 @@ def reconstruction_profile_MLP(variable, season, date_model, epoch_model, mode):
     measured_var_list = list()
     generated_var_list = list()
     gloria_var_list = list()
-    number_seasonal_sample = 0
+    canyon_var_list = list()
 
     sum_generated = torch.zeros(1, 1, 200)
     sum_measured = torch.zeros(1, 1, 200)
     sum_gloria = torch.zeros(1, 1, 200)
+    sum_canyon = torch.zeros(1, 1, 200)
+
+    loss_gloria = 0
+    loss_canyon = 0
+    loss_ppcon = 0
+
+    number_profiles = 0
 
     for sample in ds:
         year, day_rad, lat, lon, temp, psal, doxy, measured_var = sample
-        # if round(lat.item(), 2) not in [41.85, 39.11, 36.01]:
-        #     continue
-        day_sample = from_day_rad_to_day(day_rad=day_rad)
-        if season != "all" and not dict_season[season][0] <= day_sample <= dict_season[season][
-            1] and random.random() < 0.2:
-            continue
-        number_seasonal_sample += 1
+
+        number_profiles += 1
 
         generated_gloria_var = get_gloria_profile(year, day_rad, lat, lon, torch.squeeze(temp), torch.squeeze(psal),
                                                   torch.squeeze(doxy), torch.squeeze(measured_var))
         gloria_var_list.append(generated_gloria_var)
         sum_gloria += generated_gloria_var
+        loss_gloria += mse_loss(generated_gloria_var, measured_var.squeeze())
+        print(f"MLP Pietropolli: {mse_loss(generated_gloria_var, measured_var.squeeze())}")
+
+        generated_canyon_var = get_suazade_profile(year, day_rad, lat, lon, torch.squeeze(temp), torch.squeeze(psal),
+                                                   torch.squeeze(doxy), torch.squeeze(measured_var))
+        canyon_var_list.append(generated_canyon_var)
+        sum_canyon += generated_canyon_var
+        loss_canyon += mse_loss(generated_canyon_var, measured_var.squeeze())
+        print(f"CANYON-Med: {mse_loss(generated_canyon_var, measured_var.squeeze())}")
 
         output_day = model_day(day_rad.unsqueeze(1))
         output_year = model_year(year.unsqueeze(1))
@@ -112,6 +121,17 @@ def reconstruction_profile_MLP(variable, season, date_model, epoch_model, mode):
         x = torch.cat((output_day, output_year, output_lat, output_lon, temp, psal, doxy), 1)
         generated_var = model(x.float())
         generated_var = generated_var.detach()  # torch.squeeze????
+
+        sigma = 2
+        generated_var = torch.from_numpy(scipy.ndimage.gaussian_filter1d(generated_var, sigma))
+
+        loss_ppcon += mse_loss(generated_var.squeeze(), measured_var.squeeze())
+        print(f"PPCon after reg: {mse_loss(generated_var.squeeze(), measured_var.squeeze())}")
+        print(f"MLP Pietropolli: {loss_gloria / number_profiles} \t CANYON-Med: {loss_canyon / number_profiles} \t PPCon: {loss_ppcon / number_profiles}")
+
+        with open(os.getcwd() + '/../results.txt', 'a') as file:
+            file.write(
+                f"MLP Pietropolli: {loss_gloria / number_profiles} \t CANYON-Med: {loss_canyon / number_profiles} \t PPCon: {loss_ppcon / number_profiles}\n")
 
         lat_list.append(lat.item())
         lon_list.append(lon.item())
@@ -133,6 +153,8 @@ def reconstruction_profile_MLP(variable, season, date_model, epoch_model, mode):
                  label="Measured")
         plt.plot(torch.squeeze(generated_gloria_var)[cut_sup:-cut_inf], depth[cut_sup:-cut_inf], lw=3,
                  color="midnightblue", linestyle=(0, (5, 1)), label="MLP")
+        plt.plot(torch.squeeze(generated_canyon_var)[cut_sup:-cut_inf], depth[cut_sup:-cut_inf], lw=3,
+                 color="blue", linestyle=(0, (5, 1)), label="CANYON-Med")
         plt.plot(torch.squeeze(generated_var)[cut_sup:-cut_inf], depth[cut_sup:-cut_inf], lw=3,
                  color="#1F77B4", linestyle=(0, (3, 1, 1, 1)), label="PPCon")
         plt.gca().invert_yaxis()
@@ -143,7 +165,8 @@ def reconstruction_profile_MLP(variable, season, date_model, epoch_model, mode):
         plt.legend()
         plt.tight_layout()
 
-        plt.savefig(f"{path_analysis}/method_comparison_{round(lat.item(), 2)}_{round(lon.item(), 2)}.png", dpi=600)
+        # plt.show()
+        plt.savefig(f"{path_analysis}/method_comparison_{round(lat.item(), 2)}_{round(lon.item(), 2)}.png")  # , dpi=600)
         plt.close()
 
     return
