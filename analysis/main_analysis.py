@@ -9,20 +9,20 @@ from analysis.comparison_architecture import *
 # reconstruction_profile_MLP("NITRATE", "all", "2023-04-04_", 50, "test")
 
 dict_models = {
-    "NITRATE": ["2023-04-04_", 50],
-    "CHLA": ["2023-03-29", 150],
-    "BBP700": ["2023-03-29", 100]
+    "NITRATE": ["2023-12-16_", 100],
+    "CHLA": ["2023-12-17", 150],
+    "BBP700": ["2023-12-17", 100]
 }
 # my_var = "NITRATE"
 # plot_med(my_var, dict_models[my_var][0], dict_models[my_var][1], "train")
 
-for var in ["NITRATE"]:
+for var in ["BBP700"]:
     date = dict_models[var][0]
     epoch = dict_models[var][1]
-
+    reconstruction_profiles(var, date, epoch, "test")
     # reconstruction_profile(var, date, epoch, "test")
     # seasonal_and_geographic_rmse(var, date, epoch, "test")
-    plot_scatter_paper(var, date, epoch, "test")
+    # plot_scatter_paper(var, date, epoch, "test")
     # plot_scatter_paper_log(var, date, epoch, "test")
 
 for var in ["NITRATE"]:

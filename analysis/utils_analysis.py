@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
-from mpl_toolkits.basemap import Basemap
+#from mpl_toolkits.basemap import Basemap
 
 from discretization import dict_max_pressure
 from dataset import FloatDataset
@@ -46,9 +46,9 @@ def count_samples(variable):
 
 def get_reconstruction(variable, date_model, epoch_model, mode):
     # Upload the input ds
-    path_float = f"/home/gpietropolli/Desktop/canyon-float/ds/{variable}/float_ds_sf_{mode}.csv"
+    path_float = os.getcwd() + f"/../ds/{variable}/float_ds_sf_{mode}.csv"
     if mode == "all":
-        path_float = f"/home/gpietropolli/Desktop/canyon-float/ds/{variable}/float_ds_sf.csv"
+        path_float = os.getcwd() + f"/../ds/{variable}/float_ds_sf.csv"
     dataset = FloatDataset(path_float)
     ds = DataLoader(dataset, shuffle=True)
 

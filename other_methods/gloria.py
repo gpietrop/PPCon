@@ -4,12 +4,12 @@ import random
 
 import torch
 import numpy as np
-import xarray as xr
+#import xarray as xr
 import pandas as pd
-import seawater as sw
+#import seawater as sw
 
-from other_methods.PreparationData import preparation_dataset, normalization_training
-from other_methods.mlp import MLP
+#from other_methods.PreparationData import preparation_dataset, normalization_training
+#from other_methods.mlp import MLP
 from discretization import dict_max_pressure, dict_interval
 
 

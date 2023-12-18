@@ -11,17 +11,17 @@ from utils import upload_and_evaluate_model, get_output
 # Where to search the model
 dir = "results"
 
-date_nitrate = "2023-04-04_"
+date_nitrate = "2023-12-13_"
 ep_nitrate = 50
 
-date_chla = "2023-03-29"
+date_chla = "2023-12-14"
 ep_chla = 150
 
-date_BBP700 = "2023-03-29"
+date_BBP700 = "2023-12-15"
 ep_BBP700 = 100
 
 # Upload the input ds
-path_float = f"/home/gpietropolli/Desktop/canyon-float/ds/clustering/ds_sf_clustering.csv"
+path_float = os.getcwd() + f"/../ds/clustering/ds_sf_clustering.csv"
 dataset = FloatDataset(path_float)
 ds = DataLoader(dataset, shuffle=True)
 

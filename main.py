@@ -27,9 +27,9 @@ parser.add_argument('--batch_size', type=int, default=32)
 parser.add_argument('--epochs', type=int, default=0)
 parser.add_argument('--lr', type=float, default=1)
 parser.add_argument('--snaperiod', type=int, default=25)
-parser.add_argument('--dropout_rate', type=float, default=0.1)
-parser.add_argument('--lambda_l2_reg', type=float, default=0.01)
-parser.add_argument('--alpha_smooth_reg', type=float, default=0.01)
+parser.add_argument('--dropout_rate', type=float, default=0.2)
+parser.add_argument('--lambda_l2_reg', type=float, default=0.001)
+parser.add_argument('--alpha_smooth_reg', type=float, default=0.001)
 parser.add_argument('--attention_max', type=float, default=0)
 
 # ===== Parsing arguments

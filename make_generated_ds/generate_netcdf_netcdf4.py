@@ -25,9 +25,9 @@ max_pres_BBP700 = dict_max_pressure["BBP700"]
 interval_BBP700 = dict_interval["BBP700"]
 
 dict_models = {
-    "NITRATE": ["2023-04-04_", 50],
-    "CHLA": ["2023-03-29", 150],
-    "BBP700": ["2023-03-29", 100]
+    "NITRATE": ["2023-12-16_", 100],
+    "CHLA": ["2023-12-17", 150],
+    "BBP700": ["2023-12-17", 175]
 }
 
 date_nitrate = dict_models["NITRATE"][0]
@@ -52,12 +52,12 @@ model_day_BBP700, model_year_BBP700, model_lat_BBP700, model_lon_BBP700, model_B
     dir_model=dir_model_BBP700, info_model=info_BBP700, ep=dict_models["BBP700"][1])
 
 # read the float number + sampling number from the dataset
-path_df = f"/home/gpietropolli/Desktop/canyon-float/ds/clustering/ds_sf_clustering.csv"  # BUG!!!!!!!
-path_debug = f"/home/gpietropolli/Desktop/canyon-float/ds/CHLA/float_ds_sf.csv"
+path_df = os. getcwd() + f"/../ds/clustering/ds_sf_clustering.csv"  # BUG!!!!!!!
+# path_debug = os.getcwd() + f"/../ds/CHLA/float_ds_sf.csv"
 dataset = FloatDataset(path_df)
-dataset_debug = FloatDebug(path_debug)
+# dataset_debug = FloatDebug(path_debug)
 my_ds = DataLoader(dataset, shuffle=True)
-my_ds_debug = DataLoader(dataset_debug, shuffle=True)
+# my_ds_debug = DataLoader(dataset_debug, shuffle=True)
 
 # information related to the pres of PPCon generated variables
 pres_nitrate = np.arange(0, dict_max_pressure["NITRATE"], dict_interval["NITRATE"])
@@ -75,8 +75,8 @@ for sample in my_ds:
     main_dir = name_float[0][2:-4]
     # print(f"generating profiles {name_file}")
 
-    # open the netcfd file in the "ds/SUPERFLOAT" directory
-    path_superfloat = f"/home/gpietropolli/Desktop/canyon-float/ds/SUPERFLOAT_PPCon/{main_dir}/{name_file}.nc"
+    # open the netcfd file in the "ds/SUP?>,ERFLOAT" directory
+    path_superfloat = os.getcwd() + f"/../ds/SUPERFLOAT_PPCon/{main_dir}/{name_file}.nc"
     ds = nc.Dataset(path_superfloat, 'a')  # ds = nc.Dataset(path_superfloat)
 
     pres_temp_nc = ds["PRES_TEMP"][:]

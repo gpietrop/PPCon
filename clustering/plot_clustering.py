@@ -1,8 +1,8 @@
 import numpy as np
-from dadapy.data import Data
+#from dadapy.data import Data
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap
-from dadapy.plot import plot_SLAn, plot_MDS, plot_matrix, get_dendrogram, plot_DecGraph
+#from mpl_toolkits.basemap import Basemap
+#from dadapy.plot import plot_SLAn, plot_MDS, plot_matrix, get_dendrogram, plot_DecGraph
 
 
 def plot_density_points(X, log_den):

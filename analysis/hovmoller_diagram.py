@@ -21,8 +21,8 @@ sns.set_theme(context='paper', style='white', font='sans-serif', font_scale=1.5,
 dir_path = os.getcwd() + f"/../ds/SUPERFLOAT_PPCon/"
 dir_list = os.listdir(dir_path)
 
-for var in ["BBP700"]:
-    for folder_name in ["6900807"]:  # : dir_list
+for var in ["NITRATE", "CHLA", "BBP700"]:
+    for folder_name in dir_list:  # : dir_list
         if folder_name[0] == "F" or folder_name[0] == ".":
             continue
         folder_path = dir_path + folder_name
@@ -30,6 +30,7 @@ for var in ["BBP700"]:
         # get ordere list of measurements
         files = os.listdir(folder_path)
         files.sort()
+        print(files)
 
         # initialize the matrix for the cmap function
         matrix_measured = np.zeros((200, len(files)))
@@ -51,7 +52,12 @@ for var in ["BBP700"]:
             date = ds["REFERENCE_DATE_TIME"][:]
             date = [str(np.ma.getdata(date)[k])[2] for k in range(len(date))]
             date = date[4] + date[5] + "/" + date[0] + date[1] + date[2] + date[3]
-            x_ticks.append(date)
+
+            if int(date[3] + date[4] + date[5] + date[6]) > 2020:
+                index_discarded.append(index)
+                continue
+            else:
+                x_ticks.append(date)
 
             if not flag_print:
                 lat = float(ds["LATITUDE"][:])
@@ -84,7 +90,6 @@ for var in ["BBP700"]:
             if len(ds[f"PRES_{var}"][:].data) == 200:
                 matrix_measured[:, index] = -999 * np.array(200)
                 matrix_generated[:, index] = -999 * np.array(200)
-
                 index_discarded.append(index)
             else:
                 var_measured = ds[var][:].data
@@ -103,8 +108,8 @@ for var in ["BBP700"]:
         matrix_generated_full = np.delete(matrix_generated, index_discarded, axis=1)
         matrix_measured_full = np.delete(matrix_measured, index_discarded, axis=1)
 
-        mse = mean_squared_error(matrix_generated_full, matrix_measured_full)
-        print(np.sqrt(mse))
+        # mse = mean_squared_error(matrix_generated_full, matrix_measured_full)
+        # print(np.sqrt(mse))
 
         # find minimum of minima & maximum of maxima
         try:
@@ -159,8 +164,10 @@ for var in ["BBP700"]:
             cb_ticks = [float(cb.ax.get_yticklabels()[el].get_text()) for el in range(len(cb.ax.get_yticklabels()))]
             cb.ax.set_yticklabels(['{:,.0e}'.format(x) for x in cb_ticks], fontsize=8)
 
-        # plt.savefig(f"/Users/admin/Desktop/ppcon/results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png")
-        # plt.savefig(os.getcwd() + f"/../results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png", dpi=1200)
+        if not os.path.exists(os.getcwd() + f"/../results/hovm"):
+            os.mkdir(os.getcwd() + f"/../results/cmap")
+        if not os.path.exists(os.getcwd() + f"/../results/hovm/{var}/"):
+            os.mkdir(os.getcwd() + f"/../results/cmap/{var}/")
+        plt.savefig(os.getcwd() + f"/../results/cmap/{var}/{folder_name}_{round(lat, 2)}_{round(lon, 2)}.png", dpi=1200)
 
-        plt.show()
         plt.close()

@@ -2,7 +2,10 @@ from utils_analysis import *
 
 
 def reconstruction_profiles(variable, date_model, epoch_model, mode):
-    path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/fig/profile_{mode}/"
+    path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/fig/"
+    if not os.path.exists(path_analysis):
+        os.mkdir(path_analysis)
+    path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/fig/profile_{mode}_{epoch_model}/"
     if not os.path.exists(path_analysis):
         os.mkdir(path_analysis)
 
@@ -38,7 +41,7 @@ def reconstruction_profiles(variable, date_model, epoch_model, mode):
         plt.tight_layout()
 
         plt.legend()
-        plt.savefig(f"{path_analysis}profile_{round(lat, 2)}_{round(lon, 2)}.png", dpi=1200)
+        plt.savefig(f"{path_analysis}profile_{round(lat, 2)}_{round(lon, 2)}.png") #, dpi=1200)
         plt.close()
 
     return
