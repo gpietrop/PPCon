@@ -11,6 +11,7 @@ from architecture.conv1med_dp import Conv1dMed
 from architecture.mlp import MLPDay, MLPYear, MLPLon, MLPLat
 
 from discretization import dict_max_pressure, dict_interval
+import scipy.ndimage
 
 
 def plot_profiles(ds, dir, variable, ep=100):

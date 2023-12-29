@@ -106,14 +106,14 @@ def reconstruction_profile_MLP(variable, date_model, epoch_model, mode):
                                                   torch.squeeze(doxy), torch.squeeze(measured_var))
         gloria_var_list.append(generated_gloria_var)
         sum_gloria += generated_gloria_var
-        loss_gloria += mse_loss(generated_gloria_var, measured_var.squeeze())
+        loss_gloria += np.sqrt(mse_loss(generated_gloria_var, measured_var.squeeze()))
         print(f"MLP Pietropolli: {mse_loss(generated_gloria_var, measured_var.squeeze())}")
 
         generated_canyon_var = get_suazade_profile(year, day_rad, lat, lon, torch.squeeze(temp), torch.squeeze(psal),
                                                    torch.squeeze(doxy), torch.squeeze(measured_var))
         canyon_var_list.append(generated_canyon_var)
         sum_canyon += generated_canyon_var
-        loss_canyon += mse_loss(generated_canyon_var, measured_var.squeeze())
+        loss_canyon += np.sqrt(mse_loss(generated_canyon_var, measured_var.squeeze()))
         print(f"CANYON-Med: {mse_loss(generated_canyon_var, measured_var.squeeze())}")
 
         output_day = model_day(day_rad.unsqueeze(1))
@@ -136,7 +136,7 @@ def reconstruction_profile_MLP(variable, date_model, epoch_model, mode):
         sigma = 2
         generated_var = torch.from_numpy(scipy.ndimage.gaussian_filter1d(generated_var, sigma))
 
-        loss_ppcon += mse_loss(generated_var.squeeze(), measured_var.squeeze())
+        loss_ppcon += np.sqrt(mse_loss(generated_var.squeeze(), measured_var.squeeze()))
         print(f"PPCon after reg: {mse_loss(generated_var.squeeze(), measured_var.squeeze())}")
         print(f"MLP Pietropolli: {loss_gloria / number_profiles} \t CANYON-Med: {loss_canyon / number_profiles} \t PPCon: {loss_ppcon / number_profiles}")
 
