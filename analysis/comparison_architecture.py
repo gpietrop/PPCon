@@ -4,6 +4,15 @@ import scipy
 from utils_analysis import *
 
 
+def moving_average(data, window_size):
+    if window_size % 2 == 0:
+        window_size += 1  # Ensure window size is odd for symmetry
+    pad_size = window_size // 2
+    padded_data = np.pad(data, pad_size, mode='edge')
+    cumsum_vec = np.cumsum(np.insert(padded_data, 0, 0))
+    return (cumsum_vec[window_size:] - cumsum_vec[:-window_size]) / window_size
+
+
 def reconstruction_profiles(variable, date_model, epoch_model, mode):
     path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/fig/"
     if not os.path.exists(path_analysis):
@@ -26,10 +35,12 @@ def reconstruction_profiles(variable, date_model, epoch_model, mode):
         depth = np.linspace(0, max_pres, len(generated_profile.detach().numpy()))
         plt.figure(figsize=(6, 7))
 
-        plt.plot(measured_profile.detach().numpy(), depth, lw=3,
-                 color="#2CA02C", label=f"Measured")
-        plt.plot(generated_profile.detach().numpy(), depth, lw=3, linestyle=(0, (3, 1, 1, 1)),
-                 color="#1F77B4", label=f"PPCon")
+        measured_profile = moving_average(measured_profile.detach().numpy(), 3)
+        generated_profile = moving_average(generated_profile.detach().numpy(), 3)
+        # generated_profile = moving_average(generated_profile.detach().numpy(), 3)
+
+        plt.plot(measured_profile, depth, lw=3, color="#2CA02C", label=f"Measured")
+        plt.plot(generated_profile, depth, lw=3, linestyle=(0, (3, 1, 1, 1)), color="#1F77B4", label=f"PPCon")
         plt.gca().invert_yaxis()
 
         plt.xlabel(f"{dict_var_name[variable]} [{dict_unit_measure[variable]}]")
@@ -147,9 +158,12 @@ def reconstruction_profile_MLP(variable, date_model, epoch_model, mode):
         cut_sup = 3
         cut_inf = 10
 
+        measured_var = torch.squeeze(measured_var)[cut_sup:-cut_inf]
+        measured_var = moving_average(measured_var.numpy(), 5)
+
         plt.figure(figsize=(6, 7))
 
-        plt.plot(torch.squeeze(measured_var)[cut_sup:-cut_inf], depth[cut_sup:-cut_inf], lw=3, color="#2CA02C",
+        plt.plot(measured_var, depth[cut_sup:-cut_inf], lw=3, color="#2CA02C",
                  label="Measured")
         plt.plot(torch.squeeze(generated_gloria_var)[cut_sup:-cut_inf], depth[cut_sup:-cut_inf], lw=3,
                  color="midnightblue", linestyle=(0, (5, 1)), label="MLP")
