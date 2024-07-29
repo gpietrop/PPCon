@@ -14,6 +14,7 @@ dict_season = {'W': [0, 91], 'SP': [92, 182], 'SU': [183, 273], 'A': [274, 365]}
 sns.set_theme(context='paper', style='white', font='sans-serif', font_scale=1.5,
               color_codes=True, rc=None)
 
+
 def seasonal_ga_variance(season, ga, lat_list, lon_list, day_rad_list, generated_var_list, measured_var_list):
     len_profile = int(generated_var_list[0].size(dim=0))
 
@@ -112,7 +113,6 @@ def export_legend(legend, filename="legend.png"):
 
 
 def plot_scatter_paper(variable, date_model, epoch_model, mode):
-
     path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/fig/"
     if not os.path.exists(path_analysis):
         os.mkdir(path_analysis)
@@ -133,22 +133,26 @@ def plot_scatter_paper(variable, date_model, epoch_model, mode):
     ax.scatter(list_std[0], list_number_samples[0],
                s=make_dim_scatter(list_loss[0], variable),
                edgecolor='black', linewidth=1,
-               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in range(len(list(dict_color_blue.values())))],
-               marker="o", label="winter", hatch=2*patterns[0])  # winter
+               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in
+                          range(len(list(dict_color_blue.values())))],
+               marker="o", label="winter", hatch=2 * patterns[0])  # winter
     ax.scatter(list_std[1], list_number_samples[1],
                s=make_dim_scatter(list_loss[1], variable),
                edgecolor='black', linewidth=1,
-               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in range(len(list(dict_color_blue.values())))],
-               marker="o", label="spring", hatch=2*patterns[1])  # spring
+               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in
+                          range(len(list(dict_color_blue.values())))],
+               marker="o", label="spring", hatch=2 * patterns[1])  # spring
     ax.scatter(list_std[2], list_number_samples[2],
                s=make_dim_scatter(list_loss[2], variable),
                edgecolor='black', linewidth=1,
-               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in range(len(list(dict_color_blue.values())))],
-               marker="o", label="summer", hatch=3*patterns[2])  # summer
+               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in
+                          range(len(list(dict_color_blue.values())))],
+               marker="o", label="summer", hatch=3 * patterns[2])  # summer
     ax.scatter(list_std[3], list_number_samples[3],
                s=make_dim_scatter(list_loss[3], variable),
                edgecolor='black', linewidth=1,
-               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in range(len(list(dict_color_blue.values())))],
+               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in
+                          range(len(list(dict_color_blue.values())))],
                marker="o", label="autumn")  # autumn
 
     # legend 1 -- MAE dimension
@@ -174,21 +178,21 @@ def plot_scatter_paper(variable, date_model, epoch_model, mode):
 
     # legend 2 -- season
     legend_elements2 = [
-        Patch(facecolor="white", hatch=3*patterns[0], edgecolor='k', label="Winter"),
-        Patch(facecolor="white", hatch=3*patterns[1], edgecolor='k', label="Spring"),
-        Patch(facecolor="white", hatch=3*patterns[2], edgecolor='k', label="Summer"),
+        Patch(facecolor="white", hatch=3 * patterns[0], edgecolor='k', label="Winter"),
+        Patch(facecolor="white", hatch=3 * patterns[1], edgecolor='k', label="Spring"),
+        Patch(facecolor="white", hatch=3 * patterns[2], edgecolor='k', label="Summer"),
         Patch(facecolor="white", edgecolor='k', label="Autumn"),
     ]
     lg2 = ax.legend(handles=legend_elements2, bbox_to_anchor=(1.0, 0.35), loc="upper left", title="Season")
 
     # legend 3 -- ga
     legend_elements3 = [
-            Patch(facecolor=list(dict_color_blue.values())[0], edgecolor='k', label=list(dict_color_blue.keys())[0]),
-            Patch(facecolor=list(dict_color_blue.values())[1], edgecolor='k', label=list(dict_color_blue.keys())[1]),
-            Patch(facecolor=list(dict_color_blue.values())[2], edgecolor='k', label=list(dict_color_blue.keys())[2]),
-            Patch(facecolor=list(dict_color_blue.values())[3], edgecolor='k', label=list(dict_color_blue.keys())[3]),
-            Patch(facecolor=list(dict_color_blue.values())[4], edgecolor='k', label=list(dict_color_blue.keys())[4]),
-            ]
+        Patch(facecolor=list(dict_color_blue.values())[0], edgecolor='k', label=list(dict_color_blue.keys())[0]),
+        Patch(facecolor=list(dict_color_blue.values())[1], edgecolor='k', label=list(dict_color_blue.keys())[1]),
+        Patch(facecolor=list(dict_color_blue.values())[2], edgecolor='k', label=list(dict_color_blue.keys())[2]),
+        Patch(facecolor=list(dict_color_blue.values())[3], edgecolor='k', label=list(dict_color_blue.keys())[3]),
+        Patch(facecolor=list(dict_color_blue.values())[4], edgecolor='k', label=list(dict_color_blue.keys())[4]),
+    ]
     # lg3 = ax.legend(handles=legend_elements3, bbox_to_anchor=(1.0, 0.35), loc="upper left", title="Geographic Area")
 
     ax.add_artist(lg1)
@@ -214,8 +218,6 @@ def plot_scatter_paper(variable, date_model, epoch_model, mode):
 
 
 def plot_scatter_paper_log(variable, date_model, epoch_model, mode):
-
-
     path_analysis = os.getcwd() + f"/../results/{variable}/{date_model}/fig/"
     if not os.path.exists(path_analysis):
         os.mkdir(path_analysis)
@@ -236,22 +238,26 @@ def plot_scatter_paper_log(variable, date_model, epoch_model, mode):
     ax.scatter(list_std[0], list_number_samples[0],
                s=make_dim_scatter(list_loss[0], variable),
                edgecolor='black', linewidth=1,
-               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in range(len(list(dict_color_blue.values())))],
-               marker="o", label="winter", hatch=2*patterns[0])  # winter
+               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in
+                          range(len(list(dict_color_blue.values())))],
+               marker="o", label="winter", hatch=2 * patterns[0])  # winter
     ax.scatter(list_std[1], list_number_samples[1],
                s=make_dim_scatter(list_loss[1], variable),
                edgecolor='black', linewidth=1,
-               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in range(len(list(dict_color_blue.values())))],
-               marker="o", label="spring", hatch=2*patterns[1])  # spring
+               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in
+                          range(len(list(dict_color_blue.values())))],
+               marker="o", label="spring", hatch=2 * patterns[1])  # spring
     ax.scatter(list_std[2], list_number_samples[2],
                s=make_dim_scatter(list_loss[2], variable),
                edgecolor='black', linewidth=1,
-               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in range(len(list(dict_color_blue.values())))],
-               marker="o", label="summer", hatch=3*patterns[2])  # summer
+               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in
+                          range(len(list(dict_color_blue.values())))],
+               marker="o", label="summer", hatch=3 * patterns[2])  # summer
     ax.scatter(list_std[3], list_number_samples[3],
                s=make_dim_scatter(list_loss[3], variable),
                edgecolor='black', linewidth=1,
-               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in range(len(list(dict_color_blue.values())))],
+               facecolor=[list(dict_color_blue.values())[i] + (0.55,) for i in
+                          range(len(list(dict_color_blue.values())))],
                marker="o", label="autumn")  # autumn
 
     ax.set_xscale('log')
@@ -279,21 +285,21 @@ def plot_scatter_paper_log(variable, date_model, epoch_model, mode):
 
     # legend 2 -- season
     legend_elements2 = [
-        Patch(facecolor="white", hatch=3*patterns[0], edgecolor='k', label="Winter"),
-        Patch(facecolor="white", hatch=3*patterns[1], edgecolor='k', label="Spring"),
-        Patch(facecolor="white", hatch=3*patterns[2], edgecolor='k', label="Summer"),
+        Patch(facecolor="white", hatch=3 * patterns[0], edgecolor='k', label="Winter"),
+        Patch(facecolor="white", hatch=3 * patterns[1], edgecolor='k', label="Spring"),
+        Patch(facecolor="white", hatch=3 * patterns[2], edgecolor='k', label="Summer"),
         Patch(facecolor="white", edgecolor='k', label="Autumn"),
     ]
     # lg2 = ax.legend(handles=legend_elements2, bbox_to_anchor=(1.0, 0.35), loc="upper left", title="Season")
 
     # legend 3 -- ga
     legend_elements3 = [
-            Patch(facecolor=list(dict_color_blue.values())[0], edgecolor='k', label=list(dict_color_blue.keys())[0]),
-            Patch(facecolor=list(dict_color_blue.values())[1], edgecolor='k', label=list(dict_color_blue.keys())[1]),
-            Patch(facecolor=list(dict_color_blue.values())[2], edgecolor='k', label=list(dict_color_blue.keys())[2]),
-            Patch(facecolor=list(dict_color_blue.values())[3], edgecolor='k', label=list(dict_color_blue.keys())[3]),
-            Patch(facecolor=list(dict_color_blue.values())[4], edgecolor='k', label=list(dict_color_blue.keys())[4]),
-            ]
+        Patch(facecolor=list(dict_color_blue.values())[0], edgecolor='k', label=list(dict_color_blue.keys())[0]),
+        Patch(facecolor=list(dict_color_blue.values())[1], edgecolor='k', label=list(dict_color_blue.keys())[1]),
+        Patch(facecolor=list(dict_color_blue.values())[2], edgecolor='k', label=list(dict_color_blue.keys())[2]),
+        Patch(facecolor=list(dict_color_blue.values())[3], edgecolor='k', label=list(dict_color_blue.keys())[3]),
+        Patch(facecolor=list(dict_color_blue.values())[4], edgecolor='k', label=list(dict_color_blue.keys())[4]),
+    ]
     # lg3 = ax.legend(handles=legend_elements3, bbox_to_anchor=(1.0, 0.35), loc="upper left", title="Geographic Area")
 
     ax.add_artist(lg1)

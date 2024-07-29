@@ -9,7 +9,6 @@ from torch.utils.data import DataLoader
 from discretization import *
 from make_ds.make_superfloat_ds import discretize
 from utils import upload_and_evaluate_model, get_output
-from dataset import FloatDataset as FloatDebug
 from dataset_with_float_names import FloatDataset
 
 
@@ -23,9 +22,9 @@ max_pres_BBP700 = dict_max_pressure["BBP700"]
 interval_BBP700 = dict_interval["BBP700"]
 
 dict_models = {
-    "NITRATE": ["2023-12-16_", 100],
+    "NITRATE": ["2023-12-16", 100],
     "CHLA": ["2023-12-17", 150],
-    "BBP700": ["2023-12-17", 175]
+    "BBP700": ["2023-12-15", 125]
 }
 
 date_nitrate = dict_models["NITRATE"][0]

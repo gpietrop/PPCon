@@ -22,7 +22,7 @@ random.seed(123)
 parser = argparse.ArgumentParser()
 parser.add_argument('--training_folder', type=str, default="SUPERFLOAT", choices=["SUPERFLOAT", "CORIOLIS"])
 parser.add_argument('--flag_toy', type=bool, default=False)
-parser.add_argument('--variable', type=str, default="BBP700", choices=["NITRATE", "CHLA", "BBP700"])
+parser.add_argument('--variable', type=str, default="NITRATE", choices=["NITRATE", "CHLA", "BBP700"])
 parser.add_argument('--batch_size', type=int, default=32)
 parser.add_argument('--epochs', type=int, default=0)
 parser.add_argument('--lr', type=float, default=1)
@@ -31,6 +31,7 @@ parser.add_argument('--dropout_rate', type=float, default=0.2)
 parser.add_argument('--lambda_l2_reg', type=float, default=0.001)
 parser.add_argument('--alpha_smooth_reg', type=float, default=0.001)
 parser.add_argument('--attention_max', type=float, default=0)
+parser.add_argument('--flag_early_stopping', type=bool, default=False)
 
 # ===== Parsing arguments
 args = parser.parse_args()
@@ -39,7 +40,7 @@ variable = args.variable
 flag_toy = args.flag_toy
 
 batch_size = args.batch_size
-epochs = args.epochs  # args.epochs
+epochs = args.epochs
 lr = args.lr
 snaperiod = args.snaperiod
 
@@ -47,6 +48,7 @@ dp_rate = args.dropout_rate
 lambda_l2_reg = args.lambda_l2_reg
 alpha_smooth_reg = args.alpha_smooth_reg
 attention_max = args.attention_max
+flag_early_stopping = args.flag_early_stopping
 
 # ===== Printing information about the run
 print(f"The dataset used is {training_folder}\nWe used a reduced version of the ds? {bool(flag_toy)}\n"
@@ -54,7 +56,7 @@ print(f"The dataset used is {training_folder}\nWe used a reduced version of the 
       f"The total number of epochs that will be performed is {epochs}")
 
 # ===== Creating the correct dataframe according to the training folder (if it does not exists yet!)
-make_ds(training_folder, variable=variable, flag_complete=1, flag_toy=1)
+make_ds(variable=variable, flag_complete=1, flag_toy=flag_toy)
 
 if training_folder == "SUPERFLOAT":
     path_ds_train = os.getcwd() + f"/ds/{variable}/toy_ds_sf.csv" if flag_toy else os.getcwd() + f"/ds/{variable}/float_ds_sf_train.csv"
@@ -63,14 +65,6 @@ if training_folder == "SUPERFLOAT":
 train_dataset = FloatDataset(path_ds_train)
 val_dataset = FloatDataset(path_ds_test)
 
-# dataset = FloatDataset(path_ds)
-
-# train_frac = 0.8
-# train_size = int(train_frac * len(dataset))
-# val_size = len(dataset) - train_size
-
-# train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
-# print(val_dataset)
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
@@ -95,7 +89,7 @@ save_ds_info(training_folder=training_folder, flag_toy=flag_toy, batch_size=batc
 # ===== train the model
 train_model(train_loader, val_loader, epoch=epochs, lr=lr, dp_rate=dp_rate, lambda_l2_reg=lambda_l2_reg,
             alpha_smooth_reg=alpha_smooth_reg, attention_max=attention_max, snaperiod=snaperiod, dir=save_dir,
-            device=device)
+            device=device, flag_early_stopping=flag_early_stopping)
 
 # ===== plot the results obtained on the validation set
 plot_profiles(DataLoader(val_dataset, batch_size=1, shuffle=True), variable=variable, dir=save_dir, ep=epochs)

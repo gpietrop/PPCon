@@ -9,13 +9,12 @@ import torch
 from torch.optim import Adadelta
 from torch.nn.functional import mse_loss
 
-# from conv1med import Conv1dMed
 from architecture.conv1med_dp import Conv1dMed
 from architecture.mlp import MLPDay, MLPYear, MLPLat, MLPLon
 
 
 def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alpha_smooth_reg, attention_max, snaperiod,
-                device, dir, verbose=False):
+                device, dir, flag_early_stopping=False, verbose=False):
 
     save_dir = dir + "/model/"
     if not os.path.exists(save_dir):
@@ -135,11 +134,12 @@ def train_model(train_loader, val_loader, epoch, lr, dp_rate, lambda_l2_reg, alp
 
         # early_stopping needs the training loss to check if it has decreased,
         # and if it has, it will make a checkpoint of the current model
-        # early_stopping(avg_train_loss, model_conv)
-        # stop if validation loss doesn't improve after a given patience
-        # if early_stopping.early_stop:
-        #    print("Early stopping")
-        #    break
+        if flag_early_stopping:
+            early_stopping(avg_train_loss, model_conv)
+            # stop if validation loss doesn't improve after a given patience
+            if early_stopping.early_stop:
+               print("Early stopping")
+               break
 
         # Saving model and testing
         if ep % snaperiod == 0 or ep == epoch:
